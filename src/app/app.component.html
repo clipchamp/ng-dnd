@@ -1,20 +1,30 @@
-<!--The content below is only a placeholder and can be replaced.-->
-<div style="text-align:center">
-  <h1>
-    Welcome to {{ title }}!
-  </h1>
-  <img width="300" alt="Angular Logo" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNTAgMjUwIj4KICAgIDxwYXRoIGZpbGw9IiNERDAwMzEiIGQ9Ik0xMjUgMzBMMzEuOSA2My4ybDE0LjIgMTIzLjFMMTI1IDIzMGw3OC45LTQzLjcgMTQuMi0xMjMuMXoiIC8+CiAgICA8cGF0aCBmaWxsPSIjQzMwMDJGIiBkPSJNMTI1IDMwdjIyLjItLjFWMjMwbDc4LjktNDMuNyAxNC4yLTEyMy4xTDEyNSAzMHoiIC8+CiAgICA8cGF0aCAgZmlsbD0iI0ZGRkZGRiIgZD0iTTEyNSA1Mi4xTDY2LjggMTgyLjZoMjEuN2wxMS43LTI5LjJoNDkuNGwxMS43IDI5LjJIMTgzTDEyNSA1Mi4xem0xNyA4My4zaC0zNGwxNy00MC45IDE3IDQwLjl6IiAvPgogIDwvc3ZnPg==">
+<div class="sources">
+  <div class="source" itemType="test" [item]="source" [dragPreview]="preview" ccDragSource *ngFor="let source of sources" ccDragSourceDragging="source-dragging">
+    {{ source }}
+  </div>
+  <div class="source" ccDragSource itemType="test2" item="Outer" ccDragSourceDragging="source-dragging">
+    Source
+    <div class="source" itemType="test2" item="Inner" [dragPreview]="preview" style="background-color: lemonchiffon" ccDragSource
+      ccDragSourceDragging="source-dragging">
+      In Source
+    </div>
+  </div>
 </div>
-<h2>Here are some links to help you start: </h2>
-<ul>
-  <li>
-    <h2><a target="_blank" rel="noopener" href="https://angular.io/tutorial">Tour of Heroes</a></h2>
-  </li>
-  <li>
-    <h2><a target="_blank" rel="noopener" href="https://github.com/angular/angular-cli/wiki">CLI Documentation</a></h2>
-  </li>
-  <li>
-    <h2><a target="_blank" rel="noopener" href="https://blog.angular.io/">Angular blog</a></h2>
-  </li>
-</ul>
 
+<div class="targets" ccDropTarget [itemType]="['lol']">
+  <div ccDropTarget [itemType]="['test', 'test2']" (dropped)="onDrop($event)" [canDrop]="canDrop.bind(this)" class="target"
+    ccDropTargetIsOver="target-active">
+    Accept only
+    <input [value]="accept" type="text" (input)="accept = $event.target.value" />
+  </div>
+  <div ccDropTarget itemType="test2" (dropped)="onDrop($event)" class="target" ccDropTargetIsOver="target-active" style="background-color: lightcoral;">
+    Drop me here 2
+    <div ccDropTarget itemType="test" (dropped)="onDrop($event)" class="target" ccDropTargetIsOver="target-active" style="background-color: lightsalmon; width: 200px; height: 100px;">Drop me here 2</div>
+  </div>
+</div>
+
+<cc-drag-layer></cc-drag-layer>
+
+<ng-template let-item let-canDrop="canDrop" #preview>
+  <div class="preview" [class.preview-can-drop]="canDrop">{{item}}</div>
+</ng-template>
