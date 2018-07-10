@@ -7,20 +7,21 @@ import { DragBackendEvent } from 'projects/drag-n-drop/src/public_api';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  title = 'app';
-  accept = 'This';
+  sideNav = false;
+  simpleSources = [1, 2, 3];
+  simpleSources2 = [];
 
-  sources = ['This', 'Is', 'A', 'Test'];
-
-  canDrop(item: any): boolean {
-    return item === this.accept;
+  simpleDrop({ item }: any): void {
+    this.simpleSources = this.simpleSources.filter(
+      candidate => candidate !== item
+    );
+    this.simpleSources2 = [...this.simpleSources2, item];
   }
 
-  onDrop(event: DragBackendEvent): void {
-    console.warn(event);
-  }
-
-  onMouseOver(): void {
-    console.warn('mouseover');
+  simpleDrop2({ item }: any): void {
+    this.simpleSources2 = this.simpleSources2.filter(
+      candidate => candidate !== item
+    );
+    this.simpleSources = [...this.simpleSources, item];
   }
 }

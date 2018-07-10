@@ -1,30 +1,38 @@
-<div class="sources">
-  <div class="source" itemType="test" [item]="source" [dragPreview]="preview" ccDragSource *ngFor="let source of sources" ccDragSourceDragging="source-dragging">
-    {{ source }}
-  </div>
-  <div class="source" ccDragSource itemType="test2" item="Outer" ccDragSourceDragging="source-dragging">
-    Source
-    <div class="source" itemType="test2" item="Inner" [dragPreview]="preview" style="background-color: lemonchiffon" ccDragSource
-      ccDragSourceDragging="source-dragging">
-      In Source
+<mat-toolbar color="primary" (click)="sideNav = false">
+  <button mat-icon-button (click)="sideNav = !sideNav; $event.stopImmediatePropagation();">
+    <mat-icon>menu</mat-icon>
+  </button>
+  <span>
+    ng-dnd
+  </span>
+</mat-toolbar>
+<mat-drawer-container class="container">
+  <mat-drawer class="side-nav" mode="push" [opened]="sideNav" [autoFocus]="false" (openedChange)="sideNav = $event">
+    <div>
+      <button mat-button>
+        <mat-icon>home</mat-icon>Github</button>
+
+      <button mat-button>
+        <mat-icon>home</mat-icon>Clipchamp</button>
     </div>
-  </div>
-</div>
-
-<div class="targets" ccDropTarget [itemType]="['lol']">
-  <div ccDropTarget [itemType]="['test', 'test2']" (dropped)="onDrop($event)" [canDrop]="canDrop.bind(this)" class="target"
-    ccDropTargetIsOver="target-active">
-    Accept only
-    <input [value]="accept" type="text" (input)="accept = $event.target.value" />
-  </div>
-  <div ccDropTarget itemType="test2" (dropped)="onDrop($event)" class="target" ccDropTargetIsOver="target-active" style="background-color: lightcoral;">
-    Drop me here 2
-    <div ccDropTarget itemType="test" (dropped)="onDrop($event)" class="target" ccDropTargetIsOver="target-active" style="background-color: lightsalmon; width: 200px; height: 100px;">Drop me here 2</div>
-  </div>
-</div>
-
-<cc-drag-layer></cc-drag-layer>
-
-<ng-template let-item let-canDrop="canDrop" #preview>
-  <div class="preview" [class.preview-can-drop]="canDrop">{{item}}</div>
-</ng-template>
+  </mat-drawer>
+  <mat-drawer-content class="content">
+    <h1>Simple</h1>
+    <div class="drop-target-container">
+      <div class="drop-target" ccDropTarget [itemType]="'simple2'" (dropped)="simpleDrop2($event)" ccDropTargetOver="drop-target-over"
+        ccDropTargetDragging="drop-target-dragging">
+        <mat-card class="drag-source" [itemType]="'simple'" [item]="simple" ccDragSource ccDragSourceDragging="drag-source-dragging"
+          *ngFor="let simple of simpleSources">
+          Item {{ simple }}
+        </mat-card>
+      </div>
+      <div class="drop-target" ccDropTarget [itemType]="'simple'" (dropped)="simpleDrop($event)" ccDropTargetOver="drop-target-over"
+        ccDropTargetDragging="drop-target-dragging">
+        <mat-card class="drag-source" ccDragSource [itemType]="'simple2'" [item]="simple" ccDragSourceDragging="drag-source-dragging"
+          *ngFor="let simple of simpleSources2">
+          Item {{ simple }}
+        </mat-card>
+      </div>
+    </div>
+  </mat-drawer-content>
+</mat-drawer-container>

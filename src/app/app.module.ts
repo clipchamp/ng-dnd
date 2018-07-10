@@ -7,10 +7,29 @@ import {
   html5DragBackendFactory,
   DRAG_BACKEND
 } from 'dist/drag-n-drop';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import {
+  MatToolbarModule,
+  MatSidenavModule,
+  MatIconModule,
+  MatButtonModule,
+  MatCardModule,
+  MatGridListModule
+} from '@angular/material';
 
 @NgModule({
   declarations: [AppComponent],
-  imports: [BrowserModule, DragModule],
+  imports: [
+    BrowserModule,
+    DragModule,
+    BrowserAnimationsModule,
+    MatToolbarModule,
+    MatSidenavModule,
+    MatIconModule,
+    MatButtonModule,
+    MatGridListModule,
+    MatCardModule
+  ],
   providers: [
     {
       provide: DRAG_BACKEND,
