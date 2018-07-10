@@ -73,11 +73,11 @@ export class DragDispatcher2 {
     this.unsubscribes.set(dropTarget, this.backend.connectDropTarget(id, node));
     return this.backend.eventStream$.pipe(
       filter(event => event.targetId === id),
-      map(event => {
-        if (event.sourceId) {
-          const source = this.sourceRegistry.get(event.sourceId);
+      map(({ sourceId, ...event }) => {
+        if (sourceId) {
+          const source = this.sourceRegistry.get(sourceId);
           if (source) {
-            return { ...event, item: source.item };
+            return { ...event, item: source.item, source };
           }
         }
         return event;
@@ -130,6 +130,23 @@ export class DragDispatcher2 {
       return source.hostElement;
     }
     return undefined;
+  }
+
+  dragging$(itemType: string | string[]): Observable<boolean> {
+    itemType = typeof itemType === 'string' ? [itemType] : itemType;
+    return this.backend.eventStream$.pipe(
+      filter(event => {
+        const source = this.sourceRegistry.get(event.sourceId);
+        return source && itemType.indexOf(source.itemType) > -1;
+      }),
+      filter(
+        event =>
+          event.type === DragBackendEventType.DRAG_START ||
+          event.type === DragBackendEventType.DRAG_END ||
+          event.type === DragBackendEventType.DROP
+      ),
+      map(event => event.type === DragBackendEventType.DRAG_START)
+    );
   }
 
   private setupDragPreviewForDragSource(

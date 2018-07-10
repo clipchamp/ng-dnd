@@ -5,7 +5,8 @@ import { DragLayer } from './drag-layer.component';
 import { DragSource } from './drag-source.directive';
 import { DropTarget } from './drop-target.directive';
 import { DragSourceDragging } from './drag-source-dragging.directive';
-import { DropTargetIsOver } from './drop-target-is-over.directive';
+import { DropTargetIsOver } from './drop-target-over.directive';
+import { DropTargetDragging } from './drop-target-dragging.directive';
 
 @NgModule({
   imports: [CommonModule],
@@ -14,7 +15,8 @@ import { DropTargetIsOver } from './drop-target-is-over.directive';
     DropTarget,
     DragLayer,
     DragSourceDragging,
-    DropTargetIsOver
+    DropTargetIsOver,
+    DropTargetDragging
   ],
   providers: [DragDispatcher2],
   exports: [
@@ -22,7 +24,8 @@ import { DropTargetIsOver } from './drop-target-is-over.directive';
     DropTarget,
     DragLayer,
     DragSourceDragging,
-    DropTargetIsOver
+    DropTargetIsOver,
+    DropTargetDragging
   ]
 })
 export class DragModule {

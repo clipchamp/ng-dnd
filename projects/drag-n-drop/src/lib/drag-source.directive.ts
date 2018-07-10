@@ -6,7 +6,8 @@ import {
   Input,
   OnDestroy,
   Output,
-  TemplateRef
+  TemplateRef,
+  ViewContainerRef
 } from '@angular/core';
 import { Subject } from 'rxjs';
 import {
@@ -26,16 +27,6 @@ import { DragBackendEventType } from './backends/drag-backend-event-type';
 // tslint:disable-next-line:directive-class-suffix
 export class DragSource<T = any> implements AfterViewInit, OnDestroy {
   id!: string;
-  canDrop = false;
-
-  get isDragging(): boolean {
-    return this._isDragging;
-  }
-
-  set isDragging(value: boolean) {
-    this._isDragging = value;
-    this.dragging.emit(value);
-  }
 
   @Input() item!: T;
   @Input() itemType!: string;
@@ -48,7 +39,25 @@ export class DragSource<T = any> implements AfterViewInit, OnDestroy {
     return this.elementRef.nativeElement;
   }
 
+  get isDragging(): boolean {
+    return this._isDragging;
+  }
+
+  set isDragging(value: boolean) {
+    this._isDragging = value;
+    this.dragging.emit(value);
+  }
+
+  get canDrop(): boolean {
+    return this._canDrop;
+  }
+
+  set canDrop(value: boolean) {
+    this._canDrop = value;
+  }
+
   private _isDragging = false;
+  private _canDrop = false;
   private readonly eventStream = new Subject<any>();
 
   constructor(

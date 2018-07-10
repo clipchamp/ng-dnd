@@ -1,29 +1,28 @@
 import {
+  ContentChild,
   Directive,
-  AfterContentInit,
   Input,
-  OnChanges,
-  Renderer2,
-  ElementRef,
+  AfterContentInit,
   OnDestroy,
-  ContentChild
+  OnChanges,
+  ElementRef,
+  Renderer2
 } from '@angular/core';
 import { DropTarget } from './drop-target.directive';
 import { Subscription } from 'rxjs';
 
 @Directive({
-  selector: '[ccDropTargetIsOver]',
-  exportAs: 'ccDropTargetIsOver'
+  selector: '[ccDropTargetDragging]',
+  exportAs: 'ccDropTargetDragging'
 })
 // tslint:disable-next-line:directive-class-suffix
-export class DropTargetIsOver
-  implements AfterContentInit, OnChanges, OnDestroy {
+export class DropTargetDragging implements AfterContentInit, OnDestroy {
   isActive = false;
 
   @ContentChild(DropTarget) target: DropTarget;
 
   @Input()
-  set ccDropTargetIsOver(data: string[] | string) {
+  set ccDropTargetDragging(data: string[] | string) {
     const classes = Array.isArray(data) ? data : data.split(' ');
     this.classList = classes.filter(c => !!c);
   }
@@ -37,29 +36,25 @@ export class DropTargetIsOver
     if (!this.target) {
       return;
     }
-    this.subscription = this.target.hovered.subscribe(_ => this.update());
-    this.update();
-  }
-
-  ngOnChanges(): void {
-    this.update();
+    this.subscription = this.target.dragging$.subscribe(isDragging =>
+      this.update(isDragging)
+    );
   }
 
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
   }
 
-  private update(): void {
+  private update(isDragging: boolean): void {
     if (!this.target) {
       return;
     }
 
     Promise.resolve().then(() => {
-      const isOver = this.target.isOver;
-      if (this.isActive !== isOver) {
-        this.isActive = isOver;
+      if (this.isActive !== isDragging) {
+        this.isActive = isDragging;
         this.classList.map(c => {
-          if (isOver) {
+          if (isDragging) {
             this.renderer.addClass(this.elementRef.nativeElement, c);
           } else {
             this.renderer.removeClass(this.elementRef.nativeElement, c);

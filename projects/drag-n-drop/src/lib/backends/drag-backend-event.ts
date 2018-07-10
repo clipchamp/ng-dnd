@@ -3,7 +3,7 @@ import { Position } from './offset';
 
 export interface DragBackendEvent {
   type: DragBackendEventType;
-  sourceId: string;
+  sourceId?: string;
   targetId?: string;
   item?: any;
   clientOffset: Position;

@@ -240,12 +240,12 @@ export class Html5DragBackend extends DragBackend {
   }
 
   private handleDrag(event: DragEvent, sourceId: string): void {
-    const clientOffset = getEventClientOffset(event);
-    this.eventStream.next({
-      type: DragBackendEventType.DRAG_OVER,
-      clientOffset,
-      sourceId
-    });
+    // const clientOffset = getEventClientOffset(event);
+    // this.eventStream.next({
+    //   type: DragBackendEventType.DRAG_OVER,
+    //   clientOffset,
+    //   sourceId
+    // });
   }
 
   private handleDragEnter(targetId: string): void {

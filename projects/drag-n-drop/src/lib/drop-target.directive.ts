@@ -5,9 +5,11 @@ import {
   EventEmitter,
   OnDestroy,
   Output,
-  Input
+  Input,
+  OnChanges,
+  SimpleChanges
 } from '@angular/core';
-import { Subject } from 'rxjs';
+import { Subject, Observable } from 'rxjs';
 import { distinctUntilChanged, filter, takeUntil } from 'rxjs/operators';
 import { DragDispatcher2 } from './drag-dispatcher.service';
 import { DragBackendEvent } from './backends/drag-backend-event';
@@ -18,7 +20,7 @@ import { DragBackendEventType } from './backends/drag-backend-event-type';
   exportAs: 'ccDropTarget'
 })
 // tslint:disable-next-line:directive-class-suffix
-export class DropTarget implements AfterViewInit, OnDestroy {
+export class DropTarget implements AfterViewInit, OnChanges, OnDestroy {
   id: string;
   isOver = false;
 
@@ -26,6 +28,8 @@ export class DropTarget implements AfterViewInit, OnDestroy {
   @Input() canDrop: any = true;
   @Output() hovered = new EventEmitter<boolean>();
   @Output() dropped = new EventEmitter<DragBackendEvent>();
+
+  dragging$: Observable<boolean>;
 
   private readonly destroyed = new Subject<void>();
   private readonly eventStream = new Subject<DragBackendEvent>();
@@ -78,6 +82,12 @@ export class DropTarget implements AfterViewInit, OnDestroy {
       .connectDropTarget(this, this.hostElement)
       .pipe(takeUntil(this.destroyed))
       .subscribe(this.eventStream);
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes.itemType) {
+      this.dragging$ = this.dragDispatcher.dragging$(this.itemType);
+    }
   }
 
   ngOnDestroy(): void {
