@@ -24,7 +24,7 @@ let id = 0;
   styleUrls: ['./app.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class AppComponent implements AfterViewInit {
+export class AppComponent {
   sideNav = false;
   simpleSources = [
     { label: 'Item 1' },
@@ -67,10 +67,6 @@ export class AppComponent implements AfterViewInit {
   ) {
     registerIcons(iconRegistry, sanitizer);
     this.originalData = [];
-  }
-
-  ngAfterViewInit(): void {
-    this.cdRef.detach();
   }
 
   onHover(event: any): void {
