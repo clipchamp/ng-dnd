@@ -9,7 +9,7 @@ import {
   OnChanges,
   SimpleChanges
 } from '@angular/core';
-import { Subject, Observable } from 'rxjs';
+import { Subject, Subscription } from 'rxjs';
 import { distinctUntilChanged, filter, takeUntil } from 'rxjs/operators';
 import { DragDispatcher2 } from './drag-dispatcher.service';
 import { DragBackendEvent } from './backends/drag-backend-event';
@@ -26,13 +26,15 @@ export class DropTarget implements AfterViewInit, OnChanges, OnDestroy {
 
   @Input() itemType!: string | string[];
   @Input() canDrop: any = true;
-  @Output() hovered = new EventEmitter<boolean>();
-  @Output() dropped = new EventEmitter<DragBackendEvent>();
+  @Output() hovered = new EventEmitter<any>();
+  @Output() dropped = new EventEmitter<any>();
+  @Output() dragging = new EventEmitter<boolean>();
 
-  dragging$: Observable<boolean>;
-
+  private subscription = Subscription.EMPTY;
   private readonly destroyed = new Subject<void>();
   private readonly eventStream = new Subject<DragBackendEvent>();
+
+  eventStream$ = this.eventStream.asObservable();
 
   private get hostElement(): any {
     return this.elementRef.nativeElement;
@@ -52,9 +54,9 @@ export class DropTarget implements AfterViewInit, OnChanges, OnDestroy {
         ),
         takeUntil(this.destroyed)
       )
-      .subscribe(() => {
+      .subscribe(ev => {
         this.isOver = true;
-        this.hovered.emit(true);
+        this.hovered.emit(ev);
       });
     this.eventStream
       .pipe(
@@ -63,11 +65,16 @@ export class DropTarget implements AfterViewInit, OnChanges, OnDestroy {
             event.type === DragBackendEventType.DRAG_OUT ||
             event.type === DragBackendEventType.DROP
         ),
+        distinctUntilChanged(
+          (eventA, eventB) =>
+            eventA.clientOffset.x === eventB.clientOffset.x &&
+            eventA.clientOffset.y === eventB.clientOffset.y
+        ),
         takeUntil(this.destroyed)
       )
-      .subscribe(event => {
+      .subscribe(() => {
         this.isOver = false;
-        this.hovered.emit(false);
+        this.hovered.emit(undefined);
       });
     this.eventStream
       .pipe(
@@ -86,7 +93,10 @@ export class DropTarget implements AfterViewInit, OnChanges, OnDestroy {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes.itemType) {
-      this.dragging$ = this.dragDispatcher.dragging$(this.itemType);
+      this.subscription.unsubscribe();
+      this.subscription = this.dragDispatcher
+        .dragging$(this.itemType)
+        .subscribe(this.dragging);
     }
   }
 

@@ -7,26 +7,25 @@ import { DropTarget } from './drop-target.directive';
 import { DragSourceDragging } from './drag-source-dragging.directive';
 import { DropTargetIsOver } from './drop-target-over.directive';
 import { DropTargetDragging } from './drop-target-dragging.directive';
+import { DragContainer } from './drag-container.component';
+import { DragItem } from './drag-item.directive';
+
+const DECLARATIONS = [
+  DragContainer,
+  DragItem,
+  DragSource,
+  DropTarget,
+  DragLayer,
+  DragSourceDragging,
+  DropTargetIsOver,
+  DropTargetDragging
+];
 
 @NgModule({
   imports: [CommonModule],
-  declarations: [
-    DragSource,
-    DropTarget,
-    DragLayer,
-    DragSourceDragging,
-    DropTargetIsOver,
-    DropTargetDragging
-  ],
+  declarations: DECLARATIONS,
   providers: [DragDispatcher2],
-  exports: [
-    DragSource,
-    DropTarget,
-    DragLayer,
-    DragSourceDragging,
-    DropTargetIsOver,
-    DropTargetDragging
-  ]
+  exports: DECLARATIONS
 })
 export class DragModule {
   static forFeature(): ModuleWithProviders {

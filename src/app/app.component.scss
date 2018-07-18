@@ -1,0 +1,102 @@
+@import '~@angular/material/theming';
+@import 'src/styles';
+
+h1 {
+  font-family: 'Roboto', sans-serif;
+}
+
+.side-nav {
+  min-height: calc(100vh - 64px);
+  padding: 24px;
+}
+
+.github-link {
+  margin-right: 6px;
+}
+
+.clipchamp-link {
+  margin-right: 6px;
+  color: mat-color($cc-app-primary);
+}
+
+.content {
+  min-height: calc(100vh - 64px);
+  padding: 24px;
+}
+
+.drop-target-container {
+  display: flex;
+  width: 100%;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+.drop-target,
+.drop-target-hoz {
+  position: relative;
+  border-radius: 6px;
+  border: 2px dashed #dddddd;
+  color: #dddddd;
+  padding: 12px;
+  width: 100%;
+  min-height: 80px;
+  transition: border-color 200ms ease-in-out;
+  & + & {
+    margin-left: 12px;
+  }
+  mat-icon {
+    pointer-events: none;
+    width: 48px;
+    height: 48px;
+    font-size: 48px;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    color: inherit;
+    transition: color 200ms ease-in-out;
+  }
+}
+
+.drop-target-hoz {
+  display: flex;
+  & + & {
+    margin-left: 0;
+    margin-top: 12px;
+  }
+}
+
+.drag-source {
+  width: 100%;
+  transition: opacity 200ms ease-in-out;
+  cursor: pointer;
+  & + & {
+    margin-top: 12px;
+  }
+}
+
+.drag-source-hoz {
+  & + & {
+    margin-left: 12px;
+  }
+}
+
+.drag-source-dragging {
+  opacity: 0.4;
+}
+
+.drop-target-dragging {
+  border-color: mat-color($cc-app-primary);
+  color: mat-color($cc-app-primary);
+}
+
+.drop-target-over {
+  border-color: mat-color($cc-app-accent);
+  color: mat-color($cc-app-accent);
+}
+
+cc-example {
+  & + & {
+    margin-top: 36px;
+  }
+}

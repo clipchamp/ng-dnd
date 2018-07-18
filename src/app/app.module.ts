@@ -1,33 +1,38 @@
-import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
-
-import { AppComponent } from './app.component';
-import {
-  DragModule,
-  html5DragBackendFactory,
-  DRAG_BACKEND
-} from 'dist/drag-n-drop';
+import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+
+import { HighlightModule } from 'ngx-highlightjs';
 import {
   MatToolbarModule,
   MatSidenavModule,
   MatIconModule,
   MatButtonModule,
-  MatCardModule,
-  MatGridListModule
+  MatCardModule
 } from '@angular/material';
+
+import {
+  DragModule,
+  html5DragBackendFactory,
+  DRAG_BACKEND
+} from 'projects/drag-n-drop/src/public_api';
+import { AppComponent } from './app.component';
+import { ExampleModule } from './example/example.module';
 
 @NgModule({
   declarations: [AppComponent],
   imports: [
     BrowserModule,
-    DragModule,
     BrowserAnimationsModule,
+    DragModule,
+    ExampleModule,
+    HighlightModule.forRoot({
+      theme: 'xcode'
+    }),
     MatToolbarModule,
     MatSidenavModule,
     MatIconModule,
     MatButtonModule,
-    MatGridListModule,
     MatCardModule
   ],
   providers: [

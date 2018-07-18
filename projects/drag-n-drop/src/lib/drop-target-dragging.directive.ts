@@ -36,7 +36,7 @@ export class DropTargetDragging implements AfterContentInit, OnDestroy {
     if (!this.target) {
       return;
     }
-    this.subscription = this.target.dragging$.subscribe(isDragging =>
+    this.subscription = this.target.dragging.subscribe(isDragging =>
       this.update(isDragging)
     );
   }

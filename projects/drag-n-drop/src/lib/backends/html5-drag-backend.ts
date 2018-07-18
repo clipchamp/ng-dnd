@@ -1,6 +1,10 @@
 import { DragBackend } from './drag-backend';
 import { DragBackendEventType } from './drag-backend-event-type';
-import { getEventClientOffset, getDragPreviewOffset } from './offset';
+import {
+  getEventClientOffset,
+  getDragPreviewOffset,
+  getSourceClientOffset
+} from './offset';
 import { Unsubscribe } from './unsubscribe';
 import { DragBackendFactory } from './drag-backend-factory';
 import { DragDispatcher2 } from '../drag-dispatcher.service';
@@ -12,10 +16,9 @@ export function html5DragBackendFactory(): DragBackendFactory {
 export class Html5DragBackend extends DragBackend {
   private dragStartSourceId: string[] | null = null;
   private activeSourceId: string | null = null;
-  private dragEnterTargetId: string[] | null = null;
   private dragOverTargetId: string[] | null = null;
-  private dragLeaveTargetId: string[] | null = null;
   private dropTargetId: string[] | null = null;
+  private activeTargetId: string | null = null;
 
   constructor(private readonly dispatcher: DragDispatcher2) {
     super();
@@ -32,12 +35,14 @@ export class Html5DragBackend extends DragBackend {
     node.setAttribute('draggable', true);
     const handleDragStart = () => this.handleDragStart(sourceId);
     node.addEventListener('dragstart', handleDragStart);
-    const handleDrag = (e: DragEvent) => this.handleDrag(e, sourceId);
-    node.addEventListener('drag', handleDrag);
+    const doNothing = () => {};
+    node.addEventListener('dragover', doNothing);
+    node.addEventListener('drop', doNothing);
     return () => {
       node.setAttribute('draggable', false);
       node.removeEventListener('dragstart', handleDragStart);
-      node.removeEventListener('drag', handleDrag);
+      node.removeEventListener('dragover', doNothing);
+      node.removeEventListener('drop', doNothing);
       // TODO: handle active drag source case
     };
   }
@@ -46,18 +51,12 @@ export class Html5DragBackend extends DragBackend {
     if (!node) {
       return () => {};
     }
-    const handleDragEnter = () => this.handleDragEnter(targetId);
     const handleDragOver = () => this.handleDragOver(targetId);
-    const handleDragLeave = () => this.handleDragLeave(targetId);
     const handleDrop = () => this.handleDrop(targetId);
-    node.addEventListener('dragenter', handleDragEnter);
     node.addEventListener('dragover', handleDragOver);
-    node.addEventListener('dragleave', handleDragLeave);
     node.addEventListener('drop', handleDrop);
     return () => {
-      node.removeEventListener('dragenter', handleDragEnter);
       node.removeEventListener('dragover', handleDragOver);
-      node.removeEventListener('dragleave', handleDragLeave);
       node.removeEventListener('drop', handleDrop);
     };
   }
@@ -70,24 +69,23 @@ export class Html5DragBackend extends DragBackend {
     eventTarget.addEventListener('dragstart', handleDragStart);
     const handleDragEnd = (e: DragEvent) => this.handleGlobalDragEnd(e);
     eventTarget.addEventListener('dragend', handleDragEnd);
-    const handleDragEnter = (e: DragEvent) => this.handleGlobalDragEnter(e);
-    eventTarget.addEventListener('dragenter', handleDragEnter);
     const handleDragOver = (e: DragEvent) => this.handleGlobalDragOver(e);
     eventTarget.addEventListener('dragover', handleDragOver);
-    const handleDragLeave = (e: DragEvent) => this.handleGlobalDragLeave(e);
-    eventTarget.addEventListener('dragleave', handleDragLeave);
     const handleDrop = (e: DragEvent) => this.handleGlobalDrop(e);
     eventTarget.addEventListener('drop', handleDrop);
+    const doNothing = () => {};
+    document.body.addEventListener('dragover', doNothing);
+    document.body.addEventListener('drop', doNothing);
     this.teardown = () => {
       if (!eventTarget) {
         return;
       }
       eventTarget.removeEventListener('dragstart', handleDragStart);
       eventTarget.removeEventListener('dragend', handleDragEnd);
-      eventTarget.removeEventListener('dragenter', handleDragEnter);
       eventTarget.removeEventListener('dragover', handleDragOver);
-      eventTarget.removeEventListener('dragleave', handleDragLeave);
       eventTarget.removeEventListener('drop', handleDrop);
+      document.body.removeEventListener('dragover', doNothing);
+      document.body.removeEventListener('drop', doNothing);
     };
   }
 
@@ -128,88 +126,78 @@ export class Html5DragBackend extends DragBackend {
     event.preventDefault();
   }
 
-  private handleGlobalDragEnter(event: DragEvent): void {
-    const { dragEnterTargetId: targetIds, activeSourceId: sourceId } = this;
-    this.dragEnterTargetId = null;
-    if (!targetIds) {
-      return;
-    }
-    const clientOffset = getEventClientOffset(event);
-    for (let i = targetIds.length - 1; i >= 0; i--) {
-      const targetId = targetIds[i];
-      const canDrop = this.dispatcher.canDrop(targetId, sourceId);
-      if (canDrop) {
-        this.eventStream.next({
-          type: DragBackendEventType.DRAG_ENTER,
-          clientOffset,
-          targetId,
-          sourceId
-        });
-        event.preventDefault();
-        return;
-      }
-    }
-  }
-
   private handleGlobalDragEnd(event: DragEvent): void {
-    const { activeSourceId: sourceId } = this;
+    const { activeSourceId: sourceId, activeTargetId: targetId } = this;
     this.activeSourceId = null;
+    this.activeTargetId = null;
     const clientOffset = getEventClientOffset(event);
     this.eventStream.next({
       type: DragBackendEventType.DRAG_END,
       clientOffset,
       sourceId
     });
+    if (targetId) {
+      this.eventStream.next({
+        type: DragBackendEventType.DRAG_OUT,
+        clientOffset,
+        sourceId,
+        targetId
+      });
+    }
   }
 
   private handleGlobalDragOver(event: DragEvent): void {
+    const clientOffset = getEventClientOffset(event);
     const { dragOverTargetId: targetIds, activeSourceId: sourceId } = this;
     this.dragOverTargetId = null;
-    if (!targetIds) {
-      return;
-    }
-    const clientOffset = getEventClientOffset(event);
-    for (let i = targetIds.length - 1; i >= 0; i--) {
-      const targetId = targetIds[i];
-      const canDrop = this.dispatcher.canDrop(targetId, sourceId);
-      if (canDrop) {
-        this.eventStream.next({
-          type: DragBackendEventType.DRAG_OVER,
-          clientOffset,
-          targetId,
-          sourceId
-        });
-        event.preventDefault();
-        return;
+    if (targetIds) {
+      for (let i = targetIds.length - 1; i >= 0; i--) {
+        const targetId = targetIds[i];
+        const canDrop = this.dispatcher.canDrop(targetId, sourceId);
+        if (canDrop) {
+          if (this.activeTargetId && this.activeTargetId !== targetId) {
+            this.eventStream.next({
+              type: DragBackendEventType.DRAG_OUT,
+              clientOffset,
+              targetId: this.activeTargetId,
+              sourceId
+            });
+          }
+          this.activeTargetId = targetId;
+          this.eventStream.next({
+            type: DragBackendEventType.DRAG_OVER,
+            clientOffset,
+            targetId,
+            sourceId
+          });
+          event.preventDefault();
+          return;
+        }
       }
     }
-  }
-
-  private handleGlobalDragLeave(event: DragEvent): void {
-    const { dragLeaveTargetId: targetIds, activeSourceId: sourceId } = this;
-    this.dragLeaveTargetId = null;
-    if (!targetIds) {
-      return;
+    if (this.activeTargetId) {
+      this.eventStream.next({
+        type: DragBackendEventType.DRAG_OUT,
+        clientOffset,
+        targetId: this.activeTargetId,
+        sourceId
+      });
+      this.activeTargetId = null;
     }
-    const clientOffset = getEventClientOffset(event);
-    for (let i = targetIds.length - 1; i >= 0; i--) {
-      const targetId = targetIds[i];
-      const canDrop = this.dispatcher.canDrop(targetId, sourceId);
-      if (canDrop) {
-        this.eventStream.next({
-          type: DragBackendEventType.DRAG_OUT,
-          clientOffset,
-          targetId,
-          sourceId
-        });
-        event.preventDefault();
-        return;
-      }
-    }
+    this.eventStream.next({
+      type: DragBackendEventType.DRAG_OVER,
+      clientOffset,
+      sourceId
+    });
   }
 
   private handleGlobalDrop(event: DragEvent): void {
-    const { dropTargetId: targetIds, activeSourceId: sourceId } = this;
+    const {
+      dropTargetId: targetIds,
+      activeSourceId: sourceId,
+      activeTargetId
+    } = this;
+    this.activeTargetId = null;
     this.dropTargetId = null;
     if (!targetIds) {
       return;
@@ -230,6 +218,14 @@ export class Html5DragBackend extends DragBackend {
         return;
       }
     }
+    if (activeTargetId) {
+      this.eventStream.next({
+        type: DragBackendEventType.DRAG_OUT,
+        clientOffset,
+        targetId: activeTargetId,
+        sourceId
+      });
+    }
   }
 
   private handleDragStart(sourceId: string): void {
@@ -239,34 +235,11 @@ export class Html5DragBackend extends DragBackend {
     this.dragStartSourceId.unshift(sourceId);
   }
 
-  private handleDrag(event: DragEvent, sourceId: string): void {
-    // const clientOffset = getEventClientOffset(event);
-    // this.eventStream.next({
-    //   type: DragBackendEventType.DRAG_OVER,
-    //   clientOffset,
-    //   sourceId
-    // });
-  }
-
-  private handleDragEnter(targetId: string): void {
-    if (!this.dragEnterTargetId) {
-      this.dragEnterTargetId = [];
-    }
-    this.dragEnterTargetId.unshift(targetId);
-  }
-
   private handleDragOver(targetId: string): void {
     if (!this.dragOverTargetId) {
       this.dragOverTargetId = [];
     }
     this.dragOverTargetId.unshift(targetId);
-  }
-
-  private handleDragLeave(targetId: string): void {
-    if (!this.dragLeaveTargetId) {
-      this.dragLeaveTargetId = [];
-    }
-    this.dragLeaveTargetId.unshift(targetId);
   }
 
   private handleDrop(targetId: string): void {

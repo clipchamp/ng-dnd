@@ -6,8 +6,7 @@ import {
   Input,
   OnDestroy,
   Output,
-  TemplateRef,
-  ViewContainerRef
+  TemplateRef
 } from '@angular/core';
 import { Subject } from 'rxjs';
 import {
@@ -19,6 +18,7 @@ import {
 } from 'rxjs/operators';
 import { DragDispatcher2 } from './drag-dispatcher.service';
 import { DragBackendEventType } from './backends/drag-backend-event-type';
+import { DragContainer } from './drag-container.component';
 
 @Directive({
   selector: '[ccDragSource]',
@@ -27,6 +27,7 @@ import { DragBackendEventType } from './backends/drag-backend-event-type';
 // tslint:disable-next-line:directive-class-suffix
 export class DragSource<T = any> implements AfterViewInit, OnDestroy {
   id!: string;
+  container?: DragContainer;
 
   @Input() item!: T;
   @Input() itemType!: string;

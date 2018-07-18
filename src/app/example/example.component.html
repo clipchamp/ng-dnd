@@ -1,0 +1,21 @@
+<div class="header">
+  <h3 *ngIf="label && !labelTemplate">
+    {{ label }}
+  </h3>
+  <ng-template [ngIf]="labelTemplate" [ngTemplateOutlet]="labelTemplate?.templateRef"></ng-template>
+  <button mat-icon-button (click)="showSourceCode = !showSourceCode" *ngIf="sourceSections && sourceSections.length > 0">
+    <mat-icon svgIcon="source"></mat-icon>
+  </button>
+</div>
+<div class="content content--source" *ngIf="showSourceCode">
+  <mat-tab-group>
+    <mat-tab *ngFor="let section of sourceSections" [label]="section.label">
+      <div class="source-code">
+        <ng-template [ngTemplateOutlet]="section.templateRef"></ng-template>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+</div>
+<div class="content">
+  <ng-content></ng-content>
+</div>
