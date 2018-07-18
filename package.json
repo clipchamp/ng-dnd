@@ -8,7 +8,7 @@
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e",
-    "generate:docs": "ng build --prod --output-path=docs"
+    "generate:docs": "ng build --prod --output-path=docs --base-href https://clipchamp.github.io/ng-dnd/"
   },
   "private": true,
   "dependencies": {
