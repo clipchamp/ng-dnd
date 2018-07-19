@@ -85,9 +85,9 @@ export class AppComponent {
     }
   }
 
-  onHover(event: any, target: any): void {
+  onHover(event: any, target?: any): void {
     if (event) {
-      if (!!event.item.children) {
+      if (!!event.item.children && !target) {
         let index2 = this.findByPosition(
           event.clientOffset,
           event.target,
@@ -123,8 +123,8 @@ export class AppComponent {
     }
   }
 
-  onDrop(event: any, target: any): void {
-    if (!!event.item.children) {
+  onDrop(event: any, target?: any): void {
+    if (!!event.item.children && !target) {
       let index2 = this.findByPosition(event.clientOffset, event.target, true);
       if (index2 < 0) {
         index2 = this._targetData.length;
