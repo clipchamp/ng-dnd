@@ -9,7 +9,7 @@ import {
   OnChanges,
   SimpleChanges
 } from '@angular/core';
-import { Subject, Subscription } from 'rxjs';
+import { Subject, Subscription, Observable } from 'rxjs';
 import { distinctUntilChanged, filter, takeUntil } from 'rxjs/operators';
 import { DragDispatcher2 } from './drag-dispatcher.service';
 import { DragBackendEvent } from './backends/drag-backend-event';
@@ -34,7 +34,7 @@ export class DropTarget implements AfterViewInit, OnChanges, OnDestroy {
   private readonly destroyed = new Subject<void>();
   private readonly eventStream = new Subject<DragBackendEvent>();
 
-  eventStream$ = this.eventStream.asObservable();
+  eventStream$: Observable<DragBackendEvent> = this.eventStream.asObservable();
 
   private get hostElement(): any {
     return this.elementRef.nativeElement;
@@ -96,6 +96,7 @@ export class DropTarget implements AfterViewInit, OnChanges, OnDestroy {
       this.subscription.unsubscribe();
       this.subscription = this.dragDispatcher
         .dragging$(this.itemType)
+
         .subscribe(this.dragging);
     }
   }
