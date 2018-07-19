@@ -3,7 +3,6 @@ import {
   ViewChildren,
   QueryList,
   ElementRef,
-  AfterViewInit,
   ChangeDetectionStrategy,
   ChangeDetectorRef
 } from '@angular/core';
@@ -26,24 +25,6 @@ let id = 0;
 })
 export class AppComponent {
   sideNav = false;
-  simpleSources = [
-    { label: 'Item 1' },
-    { label: 'Item 2' },
-    { label: 'Item 3' },
-    { label: 'Item 4' }
-  ];
-  simpleTargets = [];
-  simpleTsSource = SIMPLE_TS_SOURCE;
-  simpleHtmlSource = SIMPLE_HTML_SOURCE;
-  simpleCssSource = SIMPLE_CSS_SOURCE;
-  hozSources = [
-    { label: 'Item 1' },
-    { label: 'Item 2' },
-    { label: 'Item 3' },
-    { label: 'Item 4' }
-  ];
-  hozTargets = [];
-
   sourceData = [
     { label: 'Item 1', source: true },
     { label: 'Item 2', source: true }
