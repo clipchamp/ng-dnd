@@ -7,12 +7,8 @@ import { DropTarget } from './drop-target.directive';
 import { DragSourceDragging } from './drag-source-dragging.directive';
 import { DropTargetIsOver } from './drop-target-over.directive';
 import { DropTargetDragging } from './drop-target-dragging.directive';
-import { DragContainer } from './drag-container.component';
-import { DragItem } from './drag-item.directive';
 
 const DECLARATIONS = [
-  DragContainer,
-  DragItem,
   DragSource,
   DropTarget,
   DragLayer,

@@ -10,16 +10,12 @@ import {
   ElementRef
 } from '@angular/core';
 import { DragItem } from './drag-item.directive';
-import { DropTarget } from './drop-target.directive';
+import { DropTarget } from '../drop-target.directive';
 import { Subject } from 'rxjs';
-import { DragSource } from './drag-source.directive';
-import { Coordinates } from './backends/offset';
-import { DragBackendEventType } from './backends/drag-backend-event-type';
-import {
-  takeUntil,
-  finalize,
-  max
-} from '../../../../node_modules/rxjs/operators';
+import { DragSource } from '../drag-source.directive';
+import { Coordinates } from '../backends/offset';
+import { DragBackendEventType } from '../backends/drag-backend-event-type';
+import { takeUntil, finalize, max } from 'rxjs/operators';
 
 interface Bounds {
   center: Coordinates;
