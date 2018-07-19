@@ -53,6 +53,8 @@ export class AppComponent {
   onDrag(isDragging: boolean): void {
     if (isDragging) {
       this.cdRef.detach();
+    } else {
+      this.cdRef.reattach();
     }
   }
 
@@ -111,8 +113,6 @@ export class AppComponent {
     this.itemBounds = this.targetRefs
       .map(elRef => elRef.nativeElement.getBoundingClientRect())
       .filter(bound => !!bound);
-
-    this.cdRef.reattach();
   }
 
   private findPosition({ y }: any): number {
