@@ -73,11 +73,11 @@ export class DragDispatcher2 {
     this.unsubscribes.set(dropTarget, this.backend.connectDropTarget(id, node));
     return this.backend.eventStream$.pipe(
       filter(event => event.targetId === id),
-      map(({ sourceId, ...event }) => {
+      map(({ sourceId, targetId, ...event }) => {
         if (sourceId) {
           const source = this.sourceRegistry.get(sourceId);
           if (source) {
-            return { ...event, item: source.item, source };
+            return { ...event, item: source.item, source, target: dropTarget };
           }
         }
         return event;
