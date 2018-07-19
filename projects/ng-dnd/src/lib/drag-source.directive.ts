@@ -6,7 +6,8 @@ import {
   Input,
   OnDestroy,
   Output,
-  TemplateRef
+  TemplateRef,
+  Optional
 } from '@angular/core';
 import { Subject } from 'rxjs';
 import {
@@ -18,6 +19,7 @@ import {
 } from 'rxjs/operators';
 import { DragDispatcher2 } from './drag-dispatcher.service';
 import { DragBackendEventType } from './backends/drag-backend-event-type';
+import { DropTarget } from './drop-target.directive';
 
 @Directive({
   selector: '[ccDragSource]',
@@ -55,13 +57,18 @@ export class DragSource<T = any> implements AfterViewInit, OnDestroy {
     this._canDrop = value;
   }
 
+  get bounds(): DOMRect {
+    return this.hostElement.getBoundingClientRect();
+  }
+
   private _isDragging = false;
   private _canDrop = false;
   private readonly eventStream = new Subject<any>();
 
   constructor(
     private readonly elementRef: ElementRef,
-    private readonly dragDispatcher: DragDispatcher2
+    private readonly dragDispatcher: DragDispatcher2,
+    @Optional() public readonly parent?: DropTarget
   ) {
     this.eventStream
       .pipe(filter(event => event.type === DragBackendEventType.DRAG_START))
