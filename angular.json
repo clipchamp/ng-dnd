@@ -105,38 +105,38 @@
         }
       }
     },
-    "drag-n-drop": {
-      "root": "projects/drag-n-drop",
-      "sourceRoot": "projects/drag-n-drop/src",
+    "ng-dnd": {
+      "root": "projects/ng-dnd",
+      "sourceRoot": "projects/ng-dnd/src",
       "projectType": "library",
       "prefix": "cc",
       "architect": {
         "build": {
           "builder": "@angular-devkit/build-ng-packagr:build",
           "options": {
-            "tsConfig": "projects/drag-n-drop/tsconfig.lib.json",
-            "project": "projects/drag-n-drop/ng-package.json"
+            "tsConfig": "projects/ng-dnd/tsconfig.lib.json",
+            "project": "projects/ng-dnd/ng-package.json"
           },
           "configurations": {
             "production": {
-              "project": "projects/drag-n-drop/ng-package.prod.json"
+              "project": "projects/ng-dnd/ng-package.prod.json"
             }
           }
         },
         "test": {
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
-            "main": "projects/drag-n-drop/src/test.ts",
-            "tsConfig": "projects/drag-n-drop/tsconfig.spec.json",
-            "karmaConfig": "projects/drag-n-drop/karma.conf.js"
+            "main": "projects/ng-dnd/src/test.ts",
+            "tsConfig": "projects/ng-dnd/tsconfig.spec.json",
+            "karmaConfig": "projects/ng-dnd/karma.conf.js"
           }
         },
         "lint": {
           "builder": "@angular-devkit/build-angular:tslint",
           "options": {
             "tsConfig": [
-              "projects/drag-n-drop/tsconfig.lib.json",
-              "projects/drag-n-drop/tsconfig.spec.json"
+              "projects/ng-dnd/tsconfig.lib.json",
+              "projects/ng-dnd/tsconfig.spec.json"
             ],
             "exclude": ["**/node_modules/**"]
           }

@@ -15,7 +15,7 @@ import {
   DragModule,
   html5DragBackendFactory,
   DRAG_BACKEND
-} from 'projects/drag-n-drop/src/public_api';
+} from 'projects/ng-dnd/src/public_api';
 import { AppComponent } from './app.component';
 import { ExampleModule } from './example/example.module';
 
