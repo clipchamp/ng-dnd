@@ -9,4 +9,5 @@ export interface DragBackendEvent {
   targetId?: string;
   item?: any;
   clientOffset: Coordinates;
+  sourceOffset?: any;
 }

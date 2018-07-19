@@ -3,7 +3,7 @@ import { DragBackendEventType } from './drag-backend-event-type';
 import {
   getEventClientOffset,
   getDragPreviewOffset,
-  getSourceClientOffset
+  getSourceOffset
 } from './offset';
 import { Unsubscribe } from './unsubscribe';
 import { DragBackendFactory } from './drag-backend-factory';
@@ -73,9 +73,6 @@ export class Html5DragBackend extends DragBackend {
     eventTarget.addEventListener('dragover', handleDragOver);
     const handleDrop = (e: DragEvent) => this.handleGlobalDrop(e);
     eventTarget.addEventListener('drop', handleDrop);
-    const doNothing = () => {};
-    document.body.addEventListener('dragover', doNothing);
-    document.body.addEventListener('drop', doNothing);
     this.teardown = () => {
       if (!eventTarget) {
         return;
@@ -84,27 +81,29 @@ export class Html5DragBackend extends DragBackend {
       eventTarget.removeEventListener('dragend', handleDragEnd);
       eventTarget.removeEventListener('dragover', handleDragOver);
       eventTarget.removeEventListener('drop', handleDrop);
-      document.body.removeEventListener('dragover', doNothing);
-      document.body.removeEventListener('drop', doNothing);
     };
   }
 
   private handleGlobalDragStart(event: DragEvent): void {
-    const { dragStartSourceId: sourceIds } = this;
+    const { dragStartSourceId: sourceIds, activeSourceId } = this;
     this.dragStartSourceId = null;
     if (!sourceIds) {
       return;
     }
     const clientOffset = getEventClientOffset(event);
-    const { dataTransfer } = event;
+    const { dataTransfer, target } = event;
     for (let i = sourceIds.length - 1; i >= 0; i--) {
       const sourceId = sourceIds[i];
       const canDrag = this.dispatcher.canDrag(sourceId);
       if (canDrag) {
+        if (activeSourceId) {
+          this.handleGlobalDragEnd(event);
+        }
         this.eventStream.next({
           type: DragBackendEventType.DRAG_START,
           sourceId,
-          clientOffset
+          clientOffset,
+          sourceOffset: getSourceOffset(target, clientOffset)
         });
         try {
           const previewImage = this.dispatcher.getPreviewImageForSourceId(

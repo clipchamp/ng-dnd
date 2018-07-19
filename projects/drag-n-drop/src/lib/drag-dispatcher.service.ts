@@ -1,6 +1,6 @@
 import { Injectable, TemplateRef, Inject, Optional } from '@angular/core';
 import { Observable } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
+import { filter, map, tap } from 'rxjs/operators';
 import { DragLayer } from './drag-layer.component';
 import { DragSource } from './drag-source.directive';
 import { DropTarget } from './drop-target.directive';
@@ -154,6 +154,7 @@ export class DragDispatcher2 {
     dragPreview: TemplateRef<any>
   ): void {
     let active = false;
+    let offset;
     eventStream$
       .pipe(
         filter(
@@ -163,9 +164,15 @@ export class DragDispatcher2 {
       )
       .subscribe(event => {
         active = true;
+        offset = event.sourceOffset;
         // tslint:disable-next-line:no-non-null-assertion
         this.dragLayer!.showPreview(event.sourceId, dragPreview, {
-          position: event.clientOffset,
+          position: {
+            x: event.clientOffset.x - offset.x,
+            y: event.clientOffset.y - offset.y
+          },
+          width: offset.width,
+          height: offset.height,
           canDrop: !!event.targetId,
           $implicit: event.item
         });
@@ -183,7 +190,12 @@ export class DragDispatcher2 {
       .subscribe(event => {
         // tslint:disable-next-line:no-non-null-assertion
         this.dragLayer!.updatePreview(event.sourceId, {
-          position: event.clientOffset,
+          position: {
+            x: event.clientOffset.x - offset.x,
+            y: event.clientOffset.y - offset.y
+          },
+          width: offset.width,
+          height: offset.height,
           canDrop: !!event.targetId,
           $implicit: event.item
         });

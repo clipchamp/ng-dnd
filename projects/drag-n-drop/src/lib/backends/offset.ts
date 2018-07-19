@@ -5,15 +5,14 @@ export interface Coordinates {
 
 const ELEMENT_NODE = 1;
 
-export function getNodeClientOffset(node: any): Coordinates {
+export function getNodeDOMRect(node: any): DOMRect {
   const el = node.nodeType === ELEMENT_NODE ? node : node.parentElement;
 
   if (!el) {
     return null;
   }
 
-  const { top, left } = el.getBoundingClientRect();
-  return { x: left, y: top };
+  return el.getBoundingClientRect();
 }
 
 export function getEventClientOffset(event: DragEvent): Coordinates {
@@ -23,24 +22,26 @@ export function getEventClientOffset(event: DragEvent): Coordinates {
   };
 }
 
-export function getSourceClientOffset(
-  sourceNode: any,
-  clientOffset: Coordinates
-): Coordinates {
-  const sourceNodeOffsetFromClient = getNodeClientOffset(sourceNode);
-  return {
-    x: clientOffset.x - sourceNodeOffsetFromClient.x,
-    y: clientOffset.y - sourceNodeOffsetFromClient.y
-  };
-}
-
 export function getDragPreviewOffset(
   dragPreview: any,
   clientOffset: Coordinates
 ): Coordinates {
-  const dragPreviewNodeOffsetFromClient = getNodeClientOffset(dragPreview);
+  const { left, top } = getNodeDOMRect(dragPreview);
   return {
-    x: clientOffset.x - dragPreviewNodeOffsetFromClient.x,
-    y: clientOffset.y - dragPreviewNodeOffsetFromClient.y
+    x: clientOffset.x - left,
+    y: clientOffset.y - top
+  };
+}
+
+export function getSourceOffset(
+  node: any,
+  clientOffset: Coordinates
+): Coordinates & { width: number; height: number } {
+  const { top, left, width, height } = getNodeDOMRect(node);
+  return {
+    x: clientOffset.x - left,
+    y: clientOffset.y - top,
+    width,
+    height
   };
 }

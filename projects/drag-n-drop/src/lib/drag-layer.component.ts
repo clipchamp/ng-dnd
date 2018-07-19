@@ -9,9 +9,11 @@ import { DragDispatcher2 } from './drag-dispatcher.service';
 @Component({
   selector: 'cc-drag-layer',
   template: `<div [style.position]="'fixed'"
-					[style.pointer-events]="'none'"
-					[style.left.px]="preview.context.position.x"
+                    [style.pointer-events]="'none'"
+                    [style.left.px]="preview.context.position.x"
                     [style.top.px]="preview.context.position.y"
+                    [style.width.px]="preview.context.width"
+                    [style.height.px]="preview.context.height"
                     [style.z-index]="9999"
 					*ngFor="let preview of previewAsArray">
 					<ng-container *ngTemplateOutlet="preview?.template; context: preview?.context"></ng-container>
