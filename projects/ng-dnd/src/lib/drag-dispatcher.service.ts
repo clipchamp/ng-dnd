@@ -55,11 +55,11 @@ export class DragDispatcher2 {
   }
 
   disconnectDragSource(dragSource: DragSource): void {
-    this.sourceRegistry.delete(dragSource.id);
     const unsubscribe = this.unsubscribes.get(dragSource);
     if (unsubscribe) {
       unsubscribe();
       this.unsubscribes.delete(dragSource);
+      this.sourceRegistry.delete(dragSource.id);
     }
   }
 
@@ -145,6 +145,7 @@ export class DragDispatcher2 {
           event.type === DragBackendEventType.DRAG_END ||
           event.type === DragBackendEventType.DROP
       ),
+      tap(event => console.warn(event)),
       map(event => event.type === DragBackendEventType.DRAG_START)
     );
   }

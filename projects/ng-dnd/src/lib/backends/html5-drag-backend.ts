@@ -43,7 +43,9 @@ export class Html5DragBackend extends DragBackend {
       node.removeEventListener('dragstart', handleDragStart);
       node.removeEventListener('dragover', doNothing);
       node.removeEventListener('drop', doNothing);
-      // TODO: handle active drag source case
+      if (this.activeSourceId === sourceId) {
+        this.handleGlobalDragEnd({ x: 0, y: 0 } as any);
+      }
     };
   }
 
@@ -129,6 +131,9 @@ export class Html5DragBackend extends DragBackend {
     const { activeSourceId: sourceId, activeTargetId: targetId } = this;
     this.activeSourceId = null;
     this.activeTargetId = null;
+    this.dragStartSourceId = null;
+    this.dragOverTargetId = null;
+    this.dropTargetId = null;
     const clientOffset = getEventClientOffset(event);
     this.eventStream.next({
       type: DragBackendEventType.DRAG_END,
