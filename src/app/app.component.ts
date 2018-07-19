@@ -4,7 +4,8 @@ import {
   QueryList,
   ElementRef,
   ChangeDetectionStrategy,
-  ChangeDetectorRef
+  ChangeDetectorRef,
+  AfterViewInit
 } from '@angular/core';
 import { MatIconRegistry } from '@angular/material';
 import { DomSanitizer } from '@angular/platform-browser';
@@ -14,6 +15,19 @@ import {
   SIMPLE_HTML_SOURCE,
   SIMPLE_CSS_SOURCE
 } from './example-1';
+import { DragSource } from 'projects/ng-dnd/src/public_api';
+
+function splice<T extends { id: string }>(
+  index: number,
+  array: T[],
+  newItem: T
+): T[] {
+  return [
+    ...array.slice(0, index).filter(candidate => candidate.id !== newItem.id),
+    newItem,
+    ...array.slice(index).filter(candidate => candidate.id !== newItem.id)
+  ];
+}
 
 let id = 0;
 
@@ -26,20 +40,24 @@ let id = 0;
 export class AppComponent {
   sideNav = false;
   sourceData = [
-    { label: 'Item 1', source: true },
-    { label: 'Item 2', source: true }
+    { label: 'Item 1' },
+    { label: 'Item 2' },
+    { label: 'Item 3' },
+    { label: 'Item 4' },
+    { label: 'Item 5' }
   ];
-  set originalData(value: any) {
-    this._data = value;
-    this.data = [...value];
+
+  set originalTargetData(value: any) {
+    this._targetData = value;
+    this.targetData = [...value];
   }
-  data: any;
 
+  targetData: any;
+
+  private _targetData: any;
   private itemBounds: any[] = [];
-  private _data: any;
 
-  @ViewChildren('targetItem', { read: ElementRef })
-  targetRefs: QueryList<ElementRef>;
+  @ViewChildren(DragSource) sources: QueryList<DragSource>;
 
   constructor(
     iconRegistry: MatIconRegistry,
@@ -47,7 +65,16 @@ export class AppComponent {
     private cdRef: ChangeDetectorRef
   ) {
     registerIcons(iconRegistry, sanitizer);
-    this.originalData = [];
+    this.originalTargetData = [
+      {
+        id: '1',
+        children: []
+      },
+      {
+        id: '2',
+        children: []
+      }
+    ];
   }
 
   onDrag(isDragging: boolean): void {
@@ -58,66 +85,96 @@ export class AppComponent {
     }
   }
 
-  onHover(event: any): void {
+  onHover(event: any, target: any): void {
     if (event) {
-      const index = this.findPosition(event.clientOffset);
-      const item = event.item.source
+      if (!!event.item.children) {
+        let index2 = this.findByPosition(
+          event.clientOffset,
+          event.target,
+          true
+        );
+        if (index2 < 0) {
+          index2 = this._targetData.length;
+        }
+        this.targetData = splice(index2, this._targetData, event.item);
+        return;
+      }
+      let index = this.findByPosition(event.clientOffset, event.target);
+      const parentIdx = this._targetData.indexOf(target);
+      const item = !event.item.id
         ? {
             ...event.item,
-            label: event.item.label + `.${id}`,
-            source: undefined
+            id: +id,
+            label: event.item.label,
+            preview: true
           }
         : event.item;
-      if (index > -1) {
-        this.data = [
-          ...this._data.slice(0, index).filter(candidate => candidate !== item),
-          item,
-          ...this._data.slice(index).filter(candidate => candidate !== item)
-        ];
-      } else {
-        this.data = [
-          ...this._data.filter(candidate => candidate !== item),
-          item
-        ];
+      if (index < 0) {
+        index = target.children.length;
       }
+      this.targetData = splice(parentIdx, this._targetData, {
+        ...target,
+        children: splice(index, target.children, item)
+      });
       this.cdRef.detectChanges();
-    } else if (this._data !== this.data) {
-      this.data = this._data;
+    } else if (this._targetData !== this.targetData) {
+      this.targetData = this._targetData;
       this.cdRef.detectChanges();
     }
   }
 
-  onDrop(event: any): void {
-    const index = this.findPosition(event.clientOffset);
-    const item = event.item.source
+  onDrop(event: any, target: any): void {
+    if (!!event.item.children) {
+      let index2 = this.findByPosition(event.clientOffset, event.target, true);
+      if (index2 < 0) {
+        index2 = this._targetData.length;
+      }
+      this.originalTargetData = splice(index2, this._targetData, event.item);
+      return;
+    }
+    let index = this.findByPosition(event.clientOffset, event.target);
+    const parentIdx = this._targetData.indexOf(target);
+    const item = !event.item.id
       ? {
           ...event.item,
-          label: event.item.label + `.${id++}`,
-          source: undefined
+          id: +id++,
+          label: event.item.label
         }
       : event.item;
-    if (index > -1) {
-      this.originalData = [
-        ...this._data.slice(0, index).filter(candidate => candidate !== item),
-        item,
-        ...this._data.slice(index).filter(candidate => candidate !== item)
-      ];
-    } else {
-      this.originalData = [
-        ...this._data.filter(candidate => candidate !== item),
-        item
-      ];
+    if (index < 0) {
+      index = target.children.length;
     }
+    this.originalTargetData = splice(parentIdx, this._targetData, {
+      ...target,
+      children: splice(index, target.children, item)
+    });
     this.cdRef.detectChanges();
 
-    this.itemBounds = this.targetRefs
-      .map(elRef => elRef.nativeElement.getBoundingClientRect())
-      .filter(bound => !!bound);
+    this.calculateBounds();
   }
 
-  private findPosition({ y }: any): number {
-    return this.itemBounds.findIndex(
-      bounds => y < bounds.top + bounds.height / 2
-    );
+  trackByFn(index: number, item: any): any {
+    return item.id;
+  }
+
+  private calculateBounds(): void {
+    this.itemBounds = this.sources.map(source => {
+      return {
+        source,
+        parent: source.parent,
+        bounds: source.bounds
+      };
+    });
+  }
+
+  private findByPosition({ x, y }: any, target: any, vertical = false): number {
+    return this.itemBounds
+      .filter(item => item.parent === target)
+      .findIndex(
+        item =>
+          vertical
+            ? y < item.bounds.top + item.bounds.height / 2
+            : x < item.bounds.left + item.bounds.width / 2
+      );
   }
 }

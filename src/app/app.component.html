@@ -17,17 +17,22 @@
   </mat-drawer>
   <mat-drawer-content class="content">
     <cc-example label="Custom Drag Preview and Full Control">
-      <div class="drop-target-container">
+      <div class="sources">
         <ng-template #dragPreview let-item>
           <mat-card class="drag-source">{{ item.label }}</mat-card>
         </ng-template>
-        <div style="width: 200px; margin-right: 20px;">
-          <mat-card class="drag-source" ccDragSource [item]="source" itemType="test" [dragPreview]="dragPreview" *ngFor="let source of sourceData">{{ source.label }}</mat-card>
-        </div>
-        <div class="drop-target" ccDropTarget [itemType]="['test']" ccDropTargetOver="drop-target-over" ccDropTargetDragging="drop-target-dragging"
-          (dragging)="onDrag($event)" (hovered)="onHover($event)" (dropped)="onDrop($event)">
-          <mat-card class="drag-source" *ngFor="let item of data" [class.drag-source-dragging]="item.preview" ccDragSource [item]="item"
-            itemType="test" [dragPreview]="dragPreview" #targetItem>{{item.label}}</mat-card>
+        <mat-card class="drag-source" ccDragSource [item]="source" itemType="item" [dragPreview]="dragPreview" ccDragSourceDragging="drag-source-dragging"
+          *ngFor="let source of sourceData">{{ source.label }}</mat-card>
+      </div>
+      <div class="drop-target-container" ccDropTarget [itemType]="['parent']" (hovered)="onHover($event)" (dropped)="onDrop($event)">
+        <div class="nested-drop-target" ccDragSource itemType="parent" [item]="target" *ngFor="let target of targetData; trackBy: trackByFn">
+          <div class="drop-target" ccDropTarget [itemType]="['item']" ccDropTargetOver="drop-target-over" ccDropTargetDragging="drop-target-dragging"
+            (dragging)="onDrag($event)" (hovered)="onHover($event, target)" (dropped)="onDrop($event, target)">
+            <mat-card class="drag-source" *ngFor="let item of target.children; trackBy: trackByFn" [class.drag-source-dragging]="item.preview"
+              ccDragSourceDragging="drag-source-dragging" ccDragSource [item]="item" itemType="item" [dragPreview]="dragPreview"
+              #targetItem>{{item.label}}</mat-card>
+            <mat-icon *ngIf="target.children.length < 1">add</mat-icon>
+          </div>
         </div>
       </div>
       <cc-drag-layer></cc-drag-layer>

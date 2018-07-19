@@ -25,14 +25,20 @@ h1 {
 }
 
 .drop-target-container {
-  display: flex;
   width: 100%;
   justify-content: flex-start;
   align-items: flex-start;
 }
 
-.drop-target,
-.drop-target-hoz {
+.nested-drop-target {
+  flex-grow: 1;
+  & + & {
+    margin-top: 24px;
+  }
+}
+
+.drop-target {
+  display: flex;
   position: relative;
   border-radius: 6px;
   border: 2px dashed #dddddd;
@@ -41,9 +47,6 @@ h1 {
   width: 100%;
   min-height: 80px;
   transition: border-color 200ms ease-in-out;
-  & + & {
-    margin-left: 12px;
-  }
   mat-icon {
     pointer-events: none;
     width: 48px;
@@ -58,25 +61,19 @@ h1 {
   }
 }
 
-.drop-target-hoz {
+.sources {
   display: flex;
-  & + & {
-    margin-left: 0;
-    margin-top: 12px;
-  }
+  margin-bottom: 24px;
 }
 
 .drag-source {
-  width: 100%;
   transition: opacity 200ms ease-in-out;
   cursor: pointer;
   & + & {
-    margin-top: 12px;
+    margin-left: 12px;
   }
-}
-
-.drag-source-hoz {
-  & + & {
+  .sources & + & {
+    margin-top: 0;
     margin-left: 12px;
   }
 }
