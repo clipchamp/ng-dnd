@@ -25,7 +25,7 @@
           <mat-card class="drag-source" ccDragSource [item]="source" itemType="test" [dragPreview]="dragPreview" *ngFor="let source of sourceData">{{ source.label }}</mat-card>
         </div>
         <div class="drop-target" ccDropTarget [itemType]="['test']" ccDropTargetOver="drop-target-over" ccDropTargetDragging="drop-target-dragging"
-          (hovered)="onHover($event)" (dropped)="onDrop($event)">
+          (dragging)="onDrag($event)" (hovered)="onHover($event)" (dropped)="onDrop($event)">
           <mat-card class="drag-source" *ngFor="let item of data" [class.drag-source-dragging]="item.preview" ccDragSource [item]="item"
             itemType="test" [dragPreview]="dragPreview" #targetItem>{{item.label}}</mat-card>
         </div>

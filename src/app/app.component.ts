@@ -58,7 +58,7 @@ export class AppComponent {
   private _data: any;
 
   @ViewChildren('targetItem', { read: ElementRef })
-  targetItems: QueryList<ElementRef>;
+  targetRefs: QueryList<ElementRef>;
 
   constructor(
     iconRegistry: MatIconRegistry,
@@ -69,8 +69,13 @@ export class AppComponent {
     this.originalData = [];
   }
 
+  onDrag(isDragging: boolean): void {
+    if (isDragging) {
+      this.cdRef.detach();
+    }
+  }
+
   onHover(event: any): void {
-    this.data = this._data;
     if (event) {
       const index = this.findPosition(event.clientOffset);
       const item = event.item.source
@@ -82,18 +87,21 @@ export class AppComponent {
         : event.item;
       if (index > -1) {
         this.data = [
-          ...this.data.slice(0, index).filter(candidate => candidate !== item),
+          ...this._data.slice(0, index).filter(candidate => candidate !== item),
           item,
-          ...this.data.slice(index).filter(candidate => candidate !== item)
+          ...this._data.slice(index).filter(candidate => candidate !== item)
         ];
       } else {
         this.data = [
-          ...this.data.filter(candidate => candidate !== item),
+          ...this._data.filter(candidate => candidate !== item),
           item
         ];
       }
+      this.cdRef.detectChanges();
+    } else if (this._data !== this.data) {
+      this.data = this._data;
+      this.cdRef.detectChanges();
     }
-    this.cdRef.detectChanges();
   }
 
   onDrop(event: any): void {
@@ -119,9 +127,11 @@ export class AppComponent {
     }
     this.cdRef.detectChanges();
 
-    this.itemBounds = this.targetItems
-      .map(item => item.nativeElement.getBoundingClientRect())
+    this.itemBounds = this.targetRefs
+      .map(elRef => elRef.nativeElement.getBoundingClientRect())
       .filter(bound => !!bound);
+
+    this.cdRef.reattach();
   }
 
   private findPosition({ y }: any): number {
