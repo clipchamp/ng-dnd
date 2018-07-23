@@ -3,10 +3,10 @@ import { DragBackendEventType } from './drag-backend-event-type';
 import { getEventClientOffset, getDragPreviewOffset, getSourceOffset } from './offset';
 import { Unsubscribe } from './unsubscribe';
 import { DragBackendFactory } from './drag-backend-factory';
-import { DragDispatcher2 } from '../drag-dispatcher.service';
+import { DragMonitor } from '../drag-monitor';
 
 export function html5DragBackendFactory(): DragBackendFactory {
-  return (dispatcher: DragDispatcher2) => new Html5DragBackend(dispatcher);
+  return (monitor: DragMonitor) => new Html5DragBackend(monitor);
 }
 
 export class Html5DragBackend extends DragBackend {
@@ -16,7 +16,7 @@ export class Html5DragBackend extends DragBackend {
   private dropTargetId: string[] | null = null;
   private activeTargetId: string | null = null;
 
-  constructor(private readonly dispatcher: DragDispatcher2) {
+  constructor(private readonly monitor: DragMonitor) {
     super();
     this.setup(window);
   }
@@ -92,7 +92,7 @@ export class Html5DragBackend extends DragBackend {
     const { dataTransfer, target } = event;
     for (let i = sourceIds.length - 1; i >= 0; i--) {
       const sourceId = sourceIds[i];
-      const canDrag = this.dispatcher.canDrag(sourceId);
+      const canDrag = this.monitor.canDrag(sourceId);
       if (canDrag) {
         if (activeSourceId) {
           this.handleGlobalDragEnd(event);
@@ -104,7 +104,7 @@ export class Html5DragBackend extends DragBackend {
           sourceOffset: getSourceOffset(target, clientOffset)
         });
         try {
-          const previewImage = this.dispatcher.getPreviewImageForSourceId(sourceId);
+          const previewImage = this.monitor.getPreviewImageForSourceId(sourceId);
           if (previewImage) {
             const { x: dragOffsetX, y: dragOffsetY } = getDragPreviewOffset(
               previewImage,
@@ -151,7 +151,7 @@ export class Html5DragBackend extends DragBackend {
     if (targetIds) {
       for (let i = targetIds.length - 1; i >= 0; i--) {
         const targetId = targetIds[i];
-        const canDrop = this.dispatcher.canDrop(targetId, sourceId);
+        const canDrop = this.monitor.canDrop(targetId, sourceId);
         if (canDrop) {
           if (this.activeTargetId && this.activeTargetId !== targetId) {
             this.eventStream.next({
@@ -199,7 +199,7 @@ export class Html5DragBackend extends DragBackend {
     const clientOffset = getEventClientOffset(event);
     for (let i = targetIds.length - 1; i >= 0; i--) {
       const targetId = targetIds[i];
-      const canDrop = this.dispatcher.canDrop(targetId, sourceId);
+      const canDrop = this.monitor.canDrop(targetId, sourceId);
       if (canDrop) {
         this.activeSourceId = null;
         this.eventStream.next({

@@ -1,6 +1,6 @@
 import { Injectable, TemplateRef, Inject, Optional } from '@angular/core';
 import { Observable } from 'rxjs';
-import { filter, map, tap } from 'rxjs/operators';
+import { filter, map } from 'rxjs/operators';
 import { DragLayer } from './drag-layer.component';
 import { DragSource } from './drag-source.directive';
 import { DropTarget } from './drop-target.directive';
@@ -9,14 +9,16 @@ import { DragBackend } from './backends/drag-backend';
 import { DragBackendEvent } from './backends/drag-backend-event';
 import { DragBackendEventType } from './backends/drag-backend-event-type';
 import { DRAG_BACKEND } from './backends/drag-backend-factory';
+import { DragRegistry } from './drag-registry';
+import { DragMonitor } from './drag-monitor';
 
 @Injectable()
 export class DragDispatcher2 {
   private idCounter = 0;
+  private readonly registry = new DragRegistry();
+  private readonly monitor = new DragMonitor(this.registry);
   private readonly backend: DragBackend = null;
   private dragLayer?: DragLayer;
-  private sourceRegistry = new Map<string, DragSource>();
-  private targetRegistry = new Map<string, DropTarget>();
   private readonly unsubscribes = new WeakMap<any, any>();
 
   constructor(
@@ -27,13 +29,13 @@ export class DragDispatcher2 {
     if (!this.backendFactory) {
       throw new Error('No drag backend provided');
     }
-    this.backend = backendFactory(this);
+    this.backend = backendFactory(this.monitor);
   }
 
   connectDragSource(dragSource: DragSource, node: any): Observable<DragBackendEvent> {
     const id = `drag_${this.idCounter++}`;
     dragSource.id = id;
-    this.sourceRegistry.set(id, dragSource);
+    this.registry.setSource(id, dragSource);
     this.unsubscribes.set(dragSource, this.backend.connectDragSource(id, node));
     const dragSourceEventStream$ = this.backend.eventStream$.pipe(
       filter(event => event.sourceId === id),
@@ -50,20 +52,20 @@ export class DragDispatcher2 {
     if (unsubscribe) {
       unsubscribe();
       this.unsubscribes.delete(dragSource);
-      this.sourceRegistry.delete(dragSource.id);
+      this.registry.deleteSource(dragSource.id);
     }
   }
 
   connectDropTarget(dropTarget: DropTarget, node: any): Observable<DragBackendEvent> {
     const id = `drop_${this.idCounter++}`;
     dropTarget.id = id;
-    this.targetRegistry.set(id, dropTarget);
+    this.registry.setTarget(id, dropTarget);
     this.unsubscribes.set(dropTarget, this.backend.connectDropTarget(id, node));
     return this.backend.eventStream$.pipe(
       filter(event => event.targetId === id),
       map(({ sourceId, targetId, ...event }) => {
         if (sourceId) {
-          const source = this.sourceRegistry.get(sourceId);
+          const source = this.registry.getSource(sourceId);
           if (source) {
             return { ...event, item: source.item, source, target: dropTarget };
           }
@@ -74,7 +76,7 @@ export class DragDispatcher2 {
   }
 
   disconnectDropTarget(dropTarget: DropTarget): void {
-    this.targetRegistry.delete(dropTarget.id);
+    this.registry.deleteTarget(dropTarget.id);
     const unsubscribe = this.unsubscribes.get(dropTarget);
     if (unsubscribe) {
       unsubscribe();
@@ -87,13 +89,13 @@ export class DragDispatcher2 {
   }
 
   canDrag(sourceId: string): boolean {
-    const source = this.sourceRegistry.get(sourceId);
+    const source = this.registry.getSource(sourceId);
     return !!source && source.canDrag;
   }
 
   canDrop(targetId: string, sourceId): boolean {
-    const target = this.targetRegistry.get(targetId);
-    const source = this.sourceRegistry.get(sourceId);
+    const target = this.registry.getTarget(targetId);
+    const source = this.registry.getSource(sourceId);
     return (
       !!target &&
       !!source &&
@@ -105,7 +107,7 @@ export class DragDispatcher2 {
   }
 
   getPreviewImageForSourceId(sourceId: string): any | undefined {
-    const source = this.sourceRegistry.get(sourceId);
+    const source = this.registry.getSource(sourceId);
     if (source && source.dragPreview instanceof TemplateRef) {
       return getEmptyImage();
     }
@@ -122,7 +124,7 @@ export class DragDispatcher2 {
     itemType = typeof itemType === 'string' ? [itemType] : itemType;
     return this.backend.eventStream$.pipe(
       filter(event => {
-        const source = this.sourceRegistry.get(event.sourceId);
+        const source = this.registry.getSource(event.sourceId);
         return source && itemType.indexOf(source.itemType) > -1;
       }),
       filter(
