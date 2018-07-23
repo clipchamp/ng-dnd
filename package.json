@@ -5,12 +5,6 @@
     "type": "git",
     "url": "https://github.com/clipchamp/ng-dnd"
   },
-  "keywords": [
-    "angular",
-    "drag-and-drop",
-    "drag",
-    "drop"
-  ],
   "license": "MIT",
   "scripts": {
     "ng": "ng",
