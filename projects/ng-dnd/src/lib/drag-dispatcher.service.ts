@@ -10,7 +10,7 @@ import { DragBackendEvent } from './backends/drag-backend-event';
 import { DragBackendEventType } from './backends/drag-backend-event-type';
 import { DRAG_BACKEND } from './backends/drag-backend-factory';
 
-@Injectable({ providedIn: 'root' })
+@Injectable()
 export class DragDispatcher2 {
   private idCounter = 0;
   private readonly backend: DragBackend = null;
