@@ -1,5 +1,7 @@
-<mat-toolbar color="primary" (click)="sideNav = false">
-  <button mat-icon-button (click)="sideNav = !sideNav; $event.stopImmediatePropagation();">
+<mat-toolbar color="primary"
+  (click)="sideNav = false">
+  <button mat-icon-button
+    (click)="sideNav = !sideNav; $event.stopImmediatePropagation();">
     <mat-icon>menu</mat-icon>
   </button>
   <span>
@@ -7,33 +9,77 @@
   </span>
 </mat-toolbar>
 <mat-drawer-container class="container">
-  <mat-drawer class="side-nav" mode="push" [opened]="sideNav" [autoFocus]="false" (openedChange)="sideNav = $event">
+  <mat-drawer class="side-nav"
+    mode="push"
+    [opened]="sideNav"
+    [autoFocus]="false"
+    (openedChange)="sideNav = $event">
     <div>
-      <a mat-button href="https://github.com/clipchamp/ng-dnd" target="_blank">
-        <mat-icon class="github-link" svgIcon="github"></mat-icon>Github</a>
-      <a mat-button href="https://clipchamp.com" target="_blank">
-        <mat-icon class="clipchamp-link" svgIcon="clipchamp"></mat-icon>Clipchamp</a>
+      <a mat-button
+        href="https://github.com/clipchamp/ng-dnd"
+        target="_blank">
+        <mat-icon class="github-link"
+          svgIcon="github"></mat-icon>Github</a>
+      <a mat-button
+        href="https://clipchamp.com"
+        target="_blank">
+        <mat-icon class="clipchamp-link"
+          svgIcon="clipchamp"></mat-icon>Clipchamp</a>
     </div>
   </mat-drawer>
   <mat-drawer-content class="content">
     <cc-example label="Custom Drag Preview and Full Control">
       <div class="sources">
-        <ng-template #dragPreview let-item>
-          <mat-card class="drag-source">{{ item.label }}</mat-card>
+        <ng-template #dragPreview
+          let-canDrop="canDrop"
+          let-item>
+          <mat-card class="drag-source drag-source-preview"
+            [class.drag-source-can-drop]="canDrop">{{ item.label }}</mat-card>
         </ng-template>
-        <mat-card class="drag-source" ccDragSource [item]="source" itemType="item" [dragPreview]="dragPreview" ccDragSourceDragging="drag-source-dragging"
+        <mat-card class="drag-source"
+          ccDragSource
+          [item]="source"
+          itemType="item"
+          [dragPreview]="dragPreview"
+          ccDragSourceDragging="drag-source-dragging"
           *ngFor="let source of sourceData">{{ source.label }}</mat-card>
       </div>
-      <div class="drop-target-container" ccDropTarget [itemType]="['parent']" (hovered)="onHover($event)" (dropped)="onDrop($event)">
-        <div class="nested-drop-target" ccDragSource itemType="parent" [item]="target" *ngFor="let target of targetData; trackBy: trackByFn">
-          <div class="drop-target" ccDropTarget [itemType]="['item']" ccDropTargetOver="drop-target-over" ccDropTargetDragging="drop-target-dragging"
-            (dragging)="onDrag($event)" (hovered)="onHover($event, target)" (dropped)="onDrop($event, target)">
-            <mat-card class="drag-source" *ngFor="let item of target.children; trackBy: trackByFn" [class.drag-source-dragging]="item.preview"
-              ccDragSourceDragging="drag-source-dragging" ccDragSource [item]="item" itemType="item" [dragPreview]="dragPreview"
-              #targetItem>{{item.label}}</mat-card>
+      <div class="drop-target-container"
+        ccDropTarget
+        [itemType]="['parent']"
+        (hovered)="onHover($event)"
+        (dropped)="onDrop($event)">
+        <div class="nested-drop-target"
+          ccDragSource
+          itemType="parent"
+          [item]="target"
+          *ngFor="let target of targetData; trackBy: trackByFn">
+          <div class="drop-target"
+            ccDropTarget
+            [itemType]="['item']"
+            ccDropTargetOver="drop-target-over"
+            ccDropTargetDragging="drop-target-dragging"
+            (dragging)="onDrag($event)"
+            (hovered)="onHover($event, target)"
+            (dropped)="onDrop($event, target)">
+            <mat-card class="drag-source"
+              *ngFor="let item of target.children; trackBy: trackByFn"
+              [class.drag-source-dragging]="item.preview"
+              ccDragSourceDragging="drag-source-dragging"
+              ccDragSource
+              [item]="item"
+              itemType="item"
+              [dragPreview]="dragPreview">{{item.label}}</mat-card>
             <mat-icon *ngIf="target.children.length < 1">add</mat-icon>
           </div>
         </div>
+      </div>
+      <div class="add-drop-target">
+        <button mat-fab
+          (click)="addTarget()"
+          color="accent">
+          <mat-icon>add</mat-icon>
+        </button>
       </div>
       <cc-drag-layer></cc-drag-layer>
     </cc-example>

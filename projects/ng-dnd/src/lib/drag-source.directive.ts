@@ -10,13 +10,7 @@ import {
   Optional
 } from '@angular/core';
 import { Subject } from 'rxjs';
-import {
-  distinctUntilChanged,
-  filter,
-  take,
-  takeUntil,
-  map
-} from 'rxjs/operators';
+import { distinctUntilChanged, filter, take, takeUntil, map } from 'rxjs/operators';
 import { DragDispatcher2 } from './drag-dispatcher.service';
 import { DragBackendEventType } from './backends/drag-backend-event-type';
 import { DropTarget } from './drop-target.directive';
@@ -83,9 +77,7 @@ export class DragSource<T = any> implements AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit(): void {
-    this.dragDispatcher
-      .connectDragSource(this, this.hostElement)
-      .subscribe(this.eventStream);
+    this.dragDispatcher.connectDragSource(this, this.hostElement).subscribe(this.eventStream);
   }
 
   ngOnDestroy(): void {
@@ -98,8 +90,7 @@ export class DragSource<T = any> implements AfterViewInit, OnDestroy {
     const endDrag$ = this.eventStream.pipe(
       filter(
         event =>
-          event.type === DragBackendEventType.DROP ||
-          event.type === DragBackendEventType.DRAG_END
+          event.type === DragBackendEventType.DROP || event.type === DragBackendEventType.DRAG_END
       ),
       take(1)
     );

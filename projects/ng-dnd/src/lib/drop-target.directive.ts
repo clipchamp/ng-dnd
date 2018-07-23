@@ -62,8 +62,7 @@ export class DropTarget implements AfterViewInit, OnChanges, OnDestroy {
       .pipe(
         filter(
           event =>
-            event.type === DragBackendEventType.DRAG_OUT ||
-            event.type === DragBackendEventType.DROP
+            event.type === DragBackendEventType.DRAG_OUT || event.type === DragBackendEventType.DROP
         ),
         distinctUntilChanged(
           (eventA, eventB) =>

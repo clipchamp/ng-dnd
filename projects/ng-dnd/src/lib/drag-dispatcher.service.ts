@@ -30,10 +30,7 @@ export class DragDispatcher2 {
     this.backend = backendFactory(this);
   }
 
-  connectDragSource(
-    dragSource: DragSource,
-    node: any
-  ): Observable<DragBackendEvent> {
+  connectDragSource(dragSource: DragSource, node: any): Observable<DragBackendEvent> {
     const id = `drag_${this.idCounter++}`;
     dragSource.id = id;
     this.sourceRegistry.set(id, dragSource);
@@ -42,14 +39,8 @@ export class DragDispatcher2 {
       filter(event => event.sourceId === id),
       map(event => ({ ...event, item: dragSource.item }))
     );
-    if (
-      !!dragSource.dragPreview &&
-      dragSource.dragPreview instanceof TemplateRef
-    ) {
-      this.setupDragPreviewForDragSource(
-        dragSourceEventStream$,
-        dragSource.dragPreview
-      );
+    if (!!dragSource.dragPreview && dragSource.dragPreview instanceof TemplateRef) {
+      this.setupDragPreviewForDragSource(dragSourceEventStream$, dragSource.dragPreview);
     }
     return dragSourceEventStream$;
   }
@@ -63,10 +54,7 @@ export class DragDispatcher2 {
     }
   }
 
-  connectDropTarget(
-    dropTarget: DropTarget,
-    node: any
-  ): Observable<DragBackendEvent> {
+  connectDropTarget(dropTarget: DropTarget, node: any): Observable<DragBackendEvent> {
     const id = `drop_${this.idCounter++}`;
     dropTarget.id = id;
     this.targetRegistry.set(id, dropTarget);
@@ -109,10 +97,8 @@ export class DragDispatcher2 {
     return (
       !!target &&
       !!source &&
-      ((typeof target.itemType === 'object' &&
-        target.itemType.indexOf(source.itemType) > -1) ||
-        (typeof target.itemType === 'string' &&
-          target.itemType === source.itemType)) &&
+      ((typeof target.itemType === 'object' && target.itemType.indexOf(source.itemType) > -1) ||
+        (typeof target.itemType === 'string' && target.itemType === source.itemType)) &&
       ((typeof target.canDrop === 'function' && target.canDrop(source.item)) ||
         (typeof target.canDrop !== 'function' && target.canDrop))
     );
@@ -145,7 +131,6 @@ export class DragDispatcher2 {
           event.type === DragBackendEventType.DRAG_END ||
           event.type === DragBackendEventType.DROP
       ),
-      tap(event => console.warn(event)),
       map(event => event.type === DragBackendEventType.DRAG_START)
     );
   }
@@ -157,12 +142,7 @@ export class DragDispatcher2 {
     let active = false;
     let offset;
     eventStream$
-      .pipe(
-        filter(
-          event =>
-            event.type === DragBackendEventType.DRAG_START && !!this.dragLayer
-        )
-      )
+      .pipe(filter(event => event.type === DragBackendEventType.DRAG_START && !!this.dragLayer))
       .subscribe(event => {
         active = true;
         offset = event.sourceOffset;

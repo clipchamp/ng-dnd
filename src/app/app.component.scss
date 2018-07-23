@@ -76,6 +76,12 @@ h1 {
     margin-top: 0;
     margin-left: 12px;
   }
+  &-preview {
+    background: red;
+  }
+  &-can-drop {
+    background: green;
+  }
 }
 
 .drag-source-dragging {
@@ -90,6 +96,12 @@ h1 {
 .drop-target-over {
   border-color: mat-color($cc-app-accent);
   color: mat-color($cc-app-accent);
+}
+
+.add-drop-target {
+  display: flex;
+  justify-content: center;
+  margin-top: 24px;
 }
 
 cc-example {

@@ -1,10 +1,6 @@
 import { DragBackend } from './drag-backend';
 import { DragBackendEventType } from './drag-backend-event-type';
-import {
-  getEventClientOffset,
-  getDragPreviewOffset,
-  getSourceOffset
-} from './offset';
+import { getEventClientOffset, getDragPreviewOffset, getSourceOffset } from './offset';
 import { Unsubscribe } from './unsubscribe';
 import { DragBackendFactory } from './drag-backend-factory';
 import { DragDispatcher2 } from '../drag-dispatcher.service';
@@ -108,9 +104,7 @@ export class Html5DragBackend extends DragBackend {
           sourceOffset: getSourceOffset(target, clientOffset)
         });
         try {
-          const previewImage = this.dispatcher.getPreviewImageForSourceId(
-            sourceId
-          );
+          const previewImage = this.dispatcher.getPreviewImageForSourceId(sourceId);
           if (previewImage) {
             const { x: dragOffsetX, y: dragOffsetY } = getDragPreviewOffset(
               previewImage,
@@ -196,11 +190,7 @@ export class Html5DragBackend extends DragBackend {
   }
 
   private handleGlobalDrop(event: DragEvent): void {
-    const {
-      dropTargetId: targetIds,
-      activeSourceId: sourceId,
-      activeTargetId
-    } = this;
+    const { dropTargetId: targetIds, activeSourceId: sourceId, activeTargetId } = this;
     this.activeTargetId = null;
     this.dropTargetId = null;
     if (!targetIds) {

@@ -2,26 +2,15 @@ import {
   Component,
   ViewChildren,
   QueryList,
-  ElementRef,
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  AfterViewInit
+  ChangeDetectorRef
 } from '@angular/core';
 import { MatIconRegistry } from '@angular/material';
 import { DomSanitizer } from '@angular/platform-browser';
 import { registerIcons } from './icons';
-import {
-  SIMPLE_TS_SOURCE,
-  SIMPLE_HTML_SOURCE,
-  SIMPLE_CSS_SOURCE
-} from './example-1';
 import { DragSource } from 'projects/ng-dnd/src/public_api';
 
-function splice<T extends { id: string }>(
-  index: number,
-  array: T[],
-  newItem: T
-): T[] {
+function splice<T extends { id: string }>(index: number, array: T[], newItem: T): T[] {
   return [
     ...array.slice(0, index).filter(candidate => candidate.id !== newItem.id),
     newItem,
@@ -73,6 +62,10 @@ export class AppComponent {
       {
         id: '2',
         children: []
+      },
+      {
+        id: '3',
+        children: []
       }
     ];
   }
@@ -88,11 +81,7 @@ export class AppComponent {
   onHover(event: any, target?: any): void {
     if (event) {
       if (!!event.item.children && !target) {
-        let index2 = this.findByPosition(
-          event.clientOffset,
-          event.target,
-          true
-        );
+        let index2 = this.findByPosition(event.clientOffset, event.target, true);
         if (index2 < 0) {
           index2 = this._targetData.length;
         }
@@ -100,22 +89,29 @@ export class AppComponent {
         return;
       }
       let index = this.findByPosition(event.clientOffset, event.target);
-      const parentIdx = this._targetData.indexOf(target);
-      const item = !event.item.id
-        ? {
-            ...event.item,
-            id: +id,
-            label: event.item.label,
-            preview: true
-          }
-        : event.item;
+      const parentIdx = this._targetData.findIndex(container => container.id === target.id);
+      const item =
+        event.item.id === undefined
+          ? {
+              ...event.item,
+              id: +id,
+              label: event.item.label,
+              preview: true
+            }
+          : event.item;
       if (index < 0) {
         index = target.children.length;
       }
-      this.targetData = splice(parentIdx, this._targetData, {
-        ...target,
-        children: splice(index, target.children, item)
-      });
+      this.targetData = splice(
+        parentIdx,
+        this._targetData
+          .filter(t => t !== target)
+          .map(t => ({ ...t, children: t.children.filter(c => c !== item) })),
+        {
+          ...target,
+          children: splice(index, target.children, item)
+        }
+      );
       this.cdRef.detectChanges();
     } else if (this._targetData !== this.targetData) {
       this.targetData = this._targetData;
@@ -133,21 +129,28 @@ export class AppComponent {
       return;
     }
     let index = this.findByPosition(event.clientOffset, event.target);
-    const parentIdx = this._targetData.indexOf(target);
-    const item = !event.item.id
-      ? {
-          ...event.item,
-          id: +id++,
-          label: event.item.label
-        }
-      : event.item;
+    const parentIdx = this._targetData.findIndex(container => container.id === target.id);
+    const item =
+      event.item.id === undefined
+        ? {
+            ...event.item,
+            id: +id++,
+            label: event.item.label
+          }
+        : event.item;
     if (index < 0) {
       index = target.children.length;
     }
-    this.originalTargetData = splice(parentIdx, this._targetData, {
-      ...target,
-      children: splice(index, target.children, item)
-    });
+    this.originalTargetData = splice(
+      parentIdx,
+      this._targetData
+        .filter(t => t !== target)
+        .map(t => ({ ...t, children: t.children.filter(c => c !== item) })),
+      {
+        ...target,
+        children: splice(index, target.children, item)
+      }
+    );
     this.cdRef.detectChanges();
 
     this.calculateBounds();
@@ -155,6 +158,18 @@ export class AppComponent {
 
   trackByFn(index: number, item: any): any {
     return item.id;
+  }
+
+  addTarget(): void {
+    const last = this._targetData[this._targetData.length - 1];
+    const newId = +last.id + 1;
+    this.originalTargetData = [
+      ...this._targetData,
+      {
+        id: newId + '',
+        children: []
+      }
+    ];
   }
 
   private calculateBounds(): void {
