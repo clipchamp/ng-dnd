@@ -1,6 +1,17 @@
 {
-  "name": "ng-dnd",
+  "name": "@clipchamp/ng-dnd",
   "version": "0.0.1",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/clipchamp/ng-dnd"
+  },
+  "keywords": [
+    "angular",
+    "drag-and-drop",
+    "drag",
+    "drop"
+  ],
+  "license": "MIT",
   "peerDependencies": {
     "@angular/common": "^6.0.0-rc.0 || ^6.0.0",
     "@angular/core": "^6.0.0-rc.0 || ^6.0.0"
