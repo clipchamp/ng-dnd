@@ -5,7 +5,7 @@ import { Subscription } from 'rxjs';
 @Directive({
   selector: '[ccIfOver]'
 })
-export class IfOverDirective implements AfterViewInit, OnDestroy {
+export class IfOver implements AfterViewInit, OnDestroy {
   private subscription = Subscription.EMPTY;
   private hasView = false;
 

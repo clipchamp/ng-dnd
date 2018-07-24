@@ -7,8 +7,8 @@ import {
   DropTarget,
   DropTargetIsOver,
   DropTargetDragging,
-  IfOverDirective,
-  IfDraggingDirective
+  IfOver,
+  IfDragging
 } from './drop-target';
 
 const DECLARATIONS = [
@@ -18,8 +18,8 @@ const DECLARATIONS = [
   DragSourceDragging,
   DropTargetIsOver,
   DropTargetDragging,
-  IfOverDirective,
-  IfDraggingDirective
+  IfOver,
+  IfDragging
 ];
 
 @NgModule({

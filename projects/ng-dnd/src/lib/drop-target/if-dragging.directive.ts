@@ -14,7 +14,7 @@ import { coerceBoolean } from '../utils/coercion';
 @Directive({
   selector: '[ccIfDragging]'
 })
-export class IfDraggingDirective implements AfterViewInit, OnDestroy {
+export class IfDragging implements AfterViewInit, OnDestroy {
   @Input()
   set ccIfDragging(value: boolean) {
     this.showWhenOver = coerceBoolean(value);
