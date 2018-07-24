@@ -102,16 +102,10 @@ export class AppComponent {
       if (index < 0) {
         index = target.children.length;
       }
-      this.targetData = splice(
-        parentIdx,
-        this._targetData
-          .filter(t => t !== target)
-          .map(t => ({ ...t, children: t.children.filter(c => c !== item) })),
-        {
-          ...target,
-          children: splice(index, target.children, item)
-        }
-      );
+      this.targetData = splice(parentIdx, this._targetData, {
+        ...target,
+        children: splice(index, target.children, item)
+      });
       this.cdRef.detectChanges();
     } else if (this._targetData !== this.targetData) {
       this.targetData = this._targetData;
