@@ -8,7 +8,7 @@ import { DragBackendEvent } from './backends/drag-backend-event';
 import { take, timeout } from 'rxjs/operators';
 import { DragBackendEventType } from './backends/drag-backend-event-type';
 import { DropTarget } from './drop-target/drop-target.directive';
-import { getEmptyImage } from './get-empty-image';
+import { getEmptyImage } from './utils/get-empty-image';
 import { TemplateRef, Component, ViewChild } from '@angular/core';
 import { DragLayer } from './drag-layer.component';
 import { DragMonitor } from './drag-monitor';
