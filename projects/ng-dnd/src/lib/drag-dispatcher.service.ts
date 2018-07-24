@@ -10,7 +10,7 @@ import { DragSource } from './drag-source';
 import { DropTarget } from './drop-target';
 import { DragRegistry } from './drag-registry';
 import { DragMonitor } from './drag-monitor';
-import { getEmptyImage } from './get-empty-image';
+import { coerceArray } from './utils/coercion';
 
 @Injectable()
 export class DragDispatcher2 {
@@ -88,40 +88,8 @@ export class DragDispatcher2 {
     this.dragLayer = dragLayer;
   }
 
-  canDrag(sourceId: string): boolean {
-    const source = this.registry.getSource(sourceId);
-    return !!source && source.canDrag;
-  }
-
-  canDrop(targetId: string, sourceId): boolean {
-    const target = this.registry.getTarget(targetId);
-    const source = this.registry.getSource(sourceId);
-    return (
-      !!target &&
-      !!source &&
-      ((typeof target.itemType === 'object' && target.itemType.indexOf(source.itemType) > -1) ||
-        (typeof target.itemType === 'string' && target.itemType === source.itemType)) &&
-      ((typeof target.canDrop === 'function' && target.canDrop(source.item)) ||
-        (typeof target.canDrop !== 'function' && target.canDrop))
-    );
-  }
-
-  getPreviewImageForSourceId(sourceId: string): any | undefined {
-    const source = this.registry.getSource(sourceId);
-    if (source && source.dragPreview instanceof TemplateRef) {
-      return getEmptyImage();
-    }
-    if (source && source.dragPreview instanceof HTMLElement) {
-      return source.dragPreview;
-    }
-    if (source) {
-      return source.hostElement;
-    }
-    return undefined;
-  }
-
   dragging$(itemType: string | string[]): Observable<boolean> {
-    itemType = typeof itemType === 'string' ? [itemType] : itemType;
+    itemType = coerceArray(itemType);
     return this.backend.eventStream$.pipe(
       filter(event => {
         const source = this.registry.getSource(event.sourceId);
