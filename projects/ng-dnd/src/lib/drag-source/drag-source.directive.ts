@@ -11,9 +11,9 @@ import {
 } from '@angular/core';
 import { Subject } from 'rxjs';
 import { distinctUntilChanged, filter, take, takeUntil, map } from 'rxjs/operators';
-import { DragDispatcher2 } from './drag-dispatcher.service';
-import { DragBackendEventType } from './backends/drag-backend-event-type';
-import { DropTarget } from './drop-target.directive';
+import { DragDispatcher2 } from '../drag-dispatcher.service';
+import { DragBackendEventType } from '../backends/drag-backend-event-type';
+import { DropTarget } from '../drop-target/drop-target.directive';
 
 @Directive({
   selector: '[ccDragSource]',

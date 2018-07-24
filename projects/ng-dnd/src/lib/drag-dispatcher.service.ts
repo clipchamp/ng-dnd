@@ -1,16 +1,16 @@
 import { Injectable, TemplateRef, Inject, Optional } from '@angular/core';
 import { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
-import { DragLayer } from './drag-layer.component';
-import { DragSource } from './drag-source.directive';
-import { DropTarget } from './drop-target.directive';
-import { getEmptyImage } from './get-empty-image';
 import { DragBackend } from './backends/drag-backend';
 import { DragBackendEvent } from './backends/drag-backend-event';
 import { DragBackendEventType } from './backends/drag-backend-event-type';
 import { DRAG_BACKEND } from './backends/drag-backend-factory';
+import { DragLayer } from './drag-layer.component';
+import { DragSource } from './drag-source';
+import { DropTarget } from './drop-target';
 import { DragRegistry } from './drag-registry';
 import { DragMonitor } from './drag-monitor';
+import { getEmptyImage } from './get-empty-image';
 
 @Injectable()
 export class DragDispatcher2 {

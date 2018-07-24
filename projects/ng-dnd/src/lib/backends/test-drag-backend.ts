@@ -1,15 +1,15 @@
-import { DragDispatcher2 } from '../drag-dispatcher.service';
+import { DragMonitor } from '../drag-monitor';
 import { DragBackend } from './drag-backend';
 import { Unsubscribe } from './unsubscribe';
 import { DragBackendFactory } from './drag-backend-factory';
 import { DragBackendEvent } from './drag-backend-event';
 
 export function testDragBackendFactory(): DragBackendFactory {
-  return (dispatcher: DragDispatcher2) => new TestDragBackend(dispatcher);
+  return (monitor: DragMonitor) => new TestDragBackend(monitor);
 }
 
 export class TestDragBackend extends DragBackend {
-  constructor(dispatcher: DragDispatcher2) {
+  constructor(monitor: DragMonitor) {
     super();
   }
 

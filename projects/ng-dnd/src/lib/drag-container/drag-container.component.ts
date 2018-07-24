@@ -10,9 +10,9 @@ import {
   ElementRef
 } from '@angular/core';
 import { DragItem } from './drag-item.directive';
-import { DropTarget } from '../drop-target.directive';
+import { DropTarget } from '../drop-target/drop-target.directive';
 import { Subject } from 'rxjs';
-import { DragSource } from '../drag-source.directive';
+import { DragSource } from '../drag-source/drag-source.directive';
 import { Coordinates } from '../backends/offset';
 import { DragBackendEventType } from '../backends/drag-backend-event-type';
 import { takeUntil, finalize, max } from 'rxjs/operators';
@@ -49,8 +49,7 @@ function attach(node: any, newParent: any, before?: any, copy = false): any {
   styles: [``]
 })
 // tslint:disable-next-line:component-class-suffix
-export class DragContainer<T = any>
-  implements AfterContentInit, AfterViewInit, OnDestroy {
+export class DragContainer<T = any> implements AfterContentInit, AfterViewInit, OnDestroy {
   @Input()
   set ccDragContainer(items: T[]) {
     if (Array.isArray(items)) {
@@ -89,19 +88,14 @@ export class DragContainer<T = any>
         )
         .subscribe(({ type, source, clientOffset }) => {
           // TODO: Cleanup
-          if (
-            type !== DragBackendEventType.DRAG_ENTER &&
-            type !== DragBackendEventType.DRAG_OVER
-          ) {
+          if (type !== DragBackendEventType.DRAG_ENTER && type !== DragBackendEventType.DRAG_OVER) {
             preview();
             preview = () => {};
             lastPos = -2;
           } else {
             const pos = this.findPositionForCoordinates(clientOffset);
             if (pos > -1 && pos !== lastPos) {
-              if (
-                this.sourceBounds[pos].source.hostElement === source.hostElement
-              ) {
+              if (this.sourceBounds[pos].source.hostElement === source.hostElement) {
                 return;
               }
               preview();
@@ -123,17 +117,15 @@ export class DragContainer<T = any>
             lastPos = pos;
           }
         });
-      this.target.dropped
-        .pipe(takeUntil(this.destroyed))
-        .subscribe(({ clientOffset, item }) => {
-          const pos = this.findPositionForCoordinates(clientOffset);
-          item = Array.isArray(item) ? [...item] : { ...item };
-          if (pos > -1) {
-            this.items.splice(pos, 0, item);
-          } else {
-            this.items.push(item);
-          }
-        });
+      this.target.dropped.pipe(takeUntil(this.destroyed)).subscribe(({ clientOffset, item }) => {
+        const pos = this.findPositionForCoordinates(clientOffset);
+        item = Array.isArray(item) ? [...item] : { ...item };
+        if (pos > -1) {
+          this.items.splice(pos, 0, item);
+        } else {
+          this.items.push(item);
+        }
+      });
     }
   }
 
@@ -157,14 +149,12 @@ export class DragContainer<T = any>
   private registerSources(): void {
     this.sources.forEach(source => {
       source.container = this;
-      return source.dropped
-        .pipe(takeUntil(this.sources.changes))
-        .subscribe(() => {
-          if (!this.copy) {
-            const position = this.items.indexOf(source.item);
-            this.items.splice(position, 1);
-          }
-        });
+      return source.dropped.pipe(takeUntil(this.sources.changes)).subscribe(() => {
+        if (!this.copy) {
+          const position = this.items.indexOf(source.item);
+          this.items.splice(position, 1);
+        }
+      });
     });
     Promise.resolve().then(() => {
       const equals = { x: {}, y: {} };
@@ -202,20 +192,13 @@ export class DragContainer<T = any>
         };
       });
 
-      const maxX = Object.keys(equals.x).reduce(
-        (xMax, x) => Math.max(xMax, equals.x[x]),
-        0
-      );
-      const maxY = Object.keys(equals.y).reduce(
-        (yMax, y) => Math.max(yMax, equals.y[y]),
-        0
-      );
+      const maxX = Object.keys(equals.x).reduce((xMax, x) => Math.max(xMax, equals.x[x]), 0);
+      const maxY = Object.keys(equals.y).reduce((yMax, y) => Math.max(yMax, equals.y[y]), 0);
 
       this.selector = maxX < maxY ? 'x' : 'y';
 
       this.sourceBounds = this.sourceBounds.sort(
-        (boundA, boundB) =>
-          boundA.center[this.selector] < boundB.center[this.selector] ? -1 : 1
+        (boundA, boundB) => (boundA.center[this.selector] < boundB.center[this.selector] ? -1 : 1)
       );
     });
   }

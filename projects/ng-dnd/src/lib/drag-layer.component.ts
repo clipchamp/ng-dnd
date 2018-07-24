@@ -1,9 +1,4 @@
-import {
-  AfterViewInit,
-  ChangeDetectorRef,
-  Component,
-  TemplateRef
-} from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, TemplateRef } from '@angular/core';
 import { DragDispatcher2 } from './drag-dispatcher.service';
 
 @Component({

@@ -11,9 +11,9 @@ import {
 } from '@angular/core';
 import { Subject, Subscription, Observable } from 'rxjs';
 import { distinctUntilChanged, filter, takeUntil } from 'rxjs/operators';
-import { DragDispatcher2 } from './drag-dispatcher.service';
-import { DragBackendEvent } from './backends/drag-backend-event';
-import { DragBackendEventType } from './backends/drag-backend-event-type';
+import { DragDispatcher2 } from '../drag-dispatcher.service';
+import { DragBackendEvent } from '../backends/drag-backend-event';
+import { DragBackendEventType } from '../backends/drag-backend-event-type';
 
 @Directive({
   selector: '[ccDropTarget]',

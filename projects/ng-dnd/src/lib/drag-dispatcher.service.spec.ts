@@ -1,22 +1,17 @@
 import { DragDispatcher2 } from './drag-dispatcher.service';
 import { TestBed } from '@angular/core/testing';
-import {
-  DRAG_BACKEND,
-  DragBackendFactory
-} from './backends/drag-backend-factory';
-import {
-  testDragBackendFactory,
-  TestDragBackend
-} from './backends/test-drag-backend';
-import { DragSource } from './drag-source.directive';
+import { DRAG_BACKEND, DragBackendFactory } from './backends/drag-backend-factory';
+import { testDragBackendFactory, TestDragBackend } from './backends/test-drag-backend';
+import { DragSource } from './drag-source/drag-source.directive';
 import { Observable } from 'rxjs';
 import { DragBackendEvent } from './backends/drag-backend-event';
 import { take, timeout } from 'rxjs/operators';
 import { DragBackendEventType } from './backends/drag-backend-event-type';
-import { DropTarget } from './drop-target.directive';
+import { DropTarget } from './drop-target/drop-target.directive';
 import { getEmptyImage } from './get-empty-image';
 import { TemplateRef, Component, ViewChild } from '@angular/core';
 import { DragLayer } from './drag-layer.component';
+import { DragMonitor } from './drag-monitor';
 
 @Component({
   template: `<ng-template #test></ng-template>`
@@ -31,12 +26,10 @@ describe('DragDispatcher', () => {
   let backendFactory: DragBackendFactory;
 
   beforeEach(() => {
-    backendFactory = jasmine
-      .createSpy('backendFactory')
-      .and.callFake((drag: DragDispatcher2) => {
-        backend = testDragBackendFactory()(drag) as any;
-        return backend;
-      });
+    backendFactory = jasmine.createSpy('backendFactory').and.callFake((monitor: DragMonitor) => {
+      backend = testDragBackendFactory()(monitor) as any;
+      return backend;
+    });
 
     TestBed.configureTestingModule({
       declarations: [MockDragPreviewTemplateComponent],
@@ -71,9 +64,7 @@ describe('DragDispatcher', () => {
     beforeEach(() => {
       mockDragSource = { canDrag: false, hostElement: mockNode } as DragSource;
       disconnectSpy = jasmine.createSpy('unsubscribe').and.stub();
-      backendSpy = spyOn(backend, 'connectDragSource').and.callFake(
-        () => disconnectSpy
-      );
+      backendSpy = spyOn(backend, 'connectDragSource').and.callFake(() => disconnectSpy);
       eventStream = dispatcher.connectDragSource(mockDragSource, mockNode);
     });
 
@@ -153,17 +144,13 @@ describe('DragDispatcher', () => {
       const fixture = TestBed.createComponent(MockDragPreviewTemplateComponent);
       const component = fixture.componentInstance;
       mockDragSource.dragPreview = component.templateRef;
-      expect(dispatcher.getPreviewImageForSourceId('drag_0')).toBe(
-        getEmptyImage()
-      );
+      expect(dispatcher.getPreviewImageForSourceId('drag_0')).toBe(getEmptyImage());
     });
 
     it('should return an html element if a node is given as a drag preview', () => {
       const dragPreviewNode = document.createElement('div');
       mockDragSource.dragPreview = dragPreviewNode;
-      expect(dispatcher.getPreviewImageForSourceId('drag_0')).toBe(
-        dragPreviewNode
-      );
+      expect(dispatcher.getPreviewImageForSourceId('drag_0')).toBe(dragPreviewNode);
     });
   });
 
@@ -176,9 +163,7 @@ describe('DragDispatcher', () => {
 
     beforeEach(() => {
       disconnectSpy = jasmine.createSpy('unsubscribe').and.stub();
-      backendSpy = spyOn(backend, 'connectDropTarget').and.callFake(
-        () => disconnectSpy
-      );
+      backendSpy = spyOn(backend, 'connectDropTarget').and.callFake(() => disconnectSpy);
       eventStream = dispatcher.connectDropTarget(mockDropTarget, mockNode);
     });
 
@@ -269,18 +254,14 @@ describe('DragDispatcher', () => {
     it('should show the drag preview when starting to drag', (done: any) => {
       backend.eventStream$.pipe(take(1)).subscribe(() => {
         expect(dragLayer.showPreview).toHaveBeenCalledTimes(1);
-        expect(dragLayer.showPreview).toHaveBeenCalledWith(
-          'drag_0',
-          dragSource.dragPreview,
-          {
-            position: {
-              x: 100,
-              y: 100
-            },
-            canDrop: false,
-            $implicit: 'test'
-          }
-        );
+        expect(dragLayer.showPreview).toHaveBeenCalledWith('drag_0', dragSource.dragPreview, {
+          position: {
+            x: 100,
+            y: 100
+          },
+          canDrop: false,
+          $implicit: 'test'
+        });
         expect(dragLayer.hidePreview).toHaveBeenCalledTimes(0);
         expect(dragLayer.updatePreview).toHaveBeenCalledTimes(0);
         done();
