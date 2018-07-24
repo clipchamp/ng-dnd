@@ -1,6 +1,6 @@
 import { TemplateRef } from '@angular/core';
 import { DragRegistry } from './drag-registry';
-import { getEmptyImage } from './get-empty-image';
+import { getEmptyImage } from './utils/get-empty-image';
 
 export class DragMonitor {
   constructor(private readonly registry: DragRegistry) {}
