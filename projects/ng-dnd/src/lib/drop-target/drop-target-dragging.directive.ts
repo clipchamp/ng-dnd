@@ -15,7 +15,6 @@ import { Subscription } from 'rxjs';
   selector: '[ccDropTargetDragging]',
   exportAs: 'ccDropTargetDragging'
 })
-// tslint:disable-next-line:directive-class-suffix
 export class DropTargetDragging implements AfterContentInit, OnDestroy {
   isActive = false;
 
@@ -36,9 +35,7 @@ export class DropTargetDragging implements AfterContentInit, OnDestroy {
     if (!this.target) {
       return;
     }
-    this.subscription = this.target.dragging.subscribe(isDragging =>
-      this.update(isDragging)
-    );
+    this.subscription = this.target.dragging.subscribe(isDragging => this.update(isDragging));
   }
 
   ngOnDestroy(): void {

@@ -19,7 +19,6 @@ import { DropTarget } from '../drop-target/drop-target.directive';
   selector: '[ccDragSource]',
   exportAs: 'ccDragSource'
 })
-// tslint:disable-next-line:directive-class-suffix
 export class DragSource<T = any> implements AfterViewInit, OnDestroy {
   id!: string;
 

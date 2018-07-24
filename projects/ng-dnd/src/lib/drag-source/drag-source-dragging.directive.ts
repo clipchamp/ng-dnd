@@ -15,9 +15,7 @@ import { Subscription } from 'rxjs';
   selector: '[ccDragSourceDragging]',
   exportAs: 'ccDragSourceDragging'
 })
-// tslint:disable-next-line:directive-class-suffix
-export class DragSourceDragging
-  implements AfterContentInit, OnChanges, OnDestroy {
+export class DragSourceDragging implements AfterContentInit, OnChanges, OnDestroy {
   isActive = false;
 
   @ContentChild(DragSource) source: DragSource;

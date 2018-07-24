@@ -14,7 +14,6 @@ import { DragDispatcher2 } from './drag-dispatcher.service';
 					<ng-container *ngTemplateOutlet="preview?.template; context: preview?.context"></ng-container>
 				</div>`
 })
-// tslint:disable-next-line:component-class-suffix
 export class DragLayer implements AfterViewInit {
   private readonly previews: {
     [id: string]: { id: string; template: any; context: any };

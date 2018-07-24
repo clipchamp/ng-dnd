@@ -15,9 +15,7 @@ import { Subscription } from 'rxjs';
   selector: '[ccDropTargetOver]',
   exportAs: 'ccDropTargetOver'
 })
-// tslint:disable-next-line:directive-class-suffix
-export class DropTargetIsOver
-  implements AfterContentInit, OnChanges, OnDestroy {
+export class DropTargetIsOver implements AfterContentInit, OnChanges, OnDestroy {
   isActive = false;
 
   @ContentChild(DropTarget) target: DropTarget;
