@@ -1,5 +1,5 @@
-import { DragSource } from './drag-source';
-import { DropTarget } from './drop-target';
+import { DragSource } from './drag-source/drag-source.directive';
+import { DropTarget } from './drop-target/drop-target.directive';
 
 export class DragRegistry {
   private sources = new Map<string, DragSource>();

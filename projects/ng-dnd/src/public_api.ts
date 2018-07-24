@@ -7,6 +7,7 @@ export * from './lib/backends/drag-backend-event';
 export * from './lib/backends/drag-backend-factory';
 export * from './lib/backends/drag-backend';
 export * from './lib/backends/html5-drag-backend';
+export * from './lib/drag-layer.component';
 export * from './lib/drag-source/drag-source.directive';
 export * from './lib/drag-source/drag-source-dragging.directive';
 export * from './lib/drop-target/drop-target.directive';

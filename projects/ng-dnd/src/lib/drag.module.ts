@@ -2,20 +2,19 @@ import { CommonModule } from '@angular/common';
 import { ModuleWithProviders, NgModule } from '@angular/core';
 import { DragDispatcher2 } from './drag-dispatcher.service';
 import { DragLayer } from './drag-layer.component';
-import { DragSource, DragSourceDragging } from './drag-source';
-import {
-  DropTarget,
-  DropTargetIsOver,
-  DropTargetDragging,
-  IfOver,
-  IfDragging
-} from './drop-target';
+import { DragSource } from './drag-source/drag-source.directive';
+import { DragSourceDragging } from './drag-source/drag-source-dragging.directive';
+import { DropTarget } from './drop-target/drop-target.directive';
+import { DropTargetIsOver } from './drop-target/drop-target-over.directive';
+import { DropTargetDragging } from './drop-target/drop-target-dragging.directive';
+import { IfOver } from './drop-target/if-over.directive';
+import { IfDragging } from './drop-target/if-dragging.directive';
 
 const DECLARATIONS = [
-  DragSource,
-  DropTarget,
   DragLayer,
+  DragSource,
   DragSourceDragging,
+  DropTarget,
   DropTargetIsOver,
   DropTargetDragging,
   IfOver,
