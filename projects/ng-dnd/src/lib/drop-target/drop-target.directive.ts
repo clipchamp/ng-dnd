@@ -93,10 +93,7 @@ export class DropTarget implements AfterViewInit, OnChanges, OnDestroy {
   ngOnChanges(changes: SimpleChanges): void {
     if (changes.itemType) {
       this.subscription.unsubscribe();
-      this.subscription = this.dragDispatcher
-        .dragging$(this.itemType)
-
-        .subscribe(this.dragging);
+      this.subscription = this.dragDispatcher.dragging$(this.itemType).subscribe(this.dragging);
     }
   }
 
