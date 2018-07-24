@@ -3,7 +3,13 @@ import { ModuleWithProviders, NgModule } from '@angular/core';
 import { DragDispatcher2 } from './drag-dispatcher.service';
 import { DragLayer } from './drag-layer.component';
 import { DragSource, DragSourceDragging } from './drag-source';
-import { DropTarget, DropTargetIsOver, DropTargetDragging } from './drop-target';
+import {
+  DropTarget,
+  DropTargetIsOver,
+  DropTargetDragging,
+  IfOverDirective,
+  IfDraggingDirective
+} from './drop-target';
 
 const DECLARATIONS = [
   DragSource,
@@ -11,7 +17,9 @@ const DECLARATIONS = [
   DragLayer,
   DragSourceDragging,
   DropTargetIsOver,
-  DropTargetDragging
+  DropTargetDragging,
+  IfOverDirective,
+  IfDraggingDirective
 ];
 
 @NgModule({
