@@ -52,7 +52,8 @@ export class DragDispatcher2 {
     if (unsubscribe) {
       unsubscribe();
       this.unsubscribes.delete(dragSource);
-      this.registry.deleteSource(dragSource.id);
+      // Delay removal of drag source from registry so the queued microtasks that rely on it get executed first
+      Promise.resolve(() => this.registry.deleteSource(dragSource.id));
     }
   }
 
@@ -91,16 +92,16 @@ export class DragDispatcher2 {
   dragging$(itemType: string | string[]): Observable<boolean> {
     itemType = coerceArray(itemType);
     return this.backend.eventStream$.pipe(
-      filter(event => {
-        const source = this.registry.getSource(event.sourceId);
-        return source && itemType.indexOf(source.itemType) > -1;
-      }),
       filter(
         event =>
           event.type === DragBackendEventType.DRAG_START ||
           event.type === DragBackendEventType.DRAG_END ||
           event.type === DragBackendEventType.DROP
       ),
+      filter(event => {
+        const source = this.registry.getSource(event.sourceId);
+        return source && itemType.indexOf(source.itemType) > -1;
+      }),
       map(event => event.type === DragBackendEventType.DRAG_START)
     );
   }
