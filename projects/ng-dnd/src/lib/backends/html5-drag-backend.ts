@@ -16,8 +16,8 @@ export class Html5DragBackend extends DragBackend {
   private dropTargetId: string[] | null = null;
   private activeTargetId: string | null = null;
 
-  constructor(private readonly monitor: DragMonitor) {
-    super();
+  constructor(monitor: DragMonitor) {
+    super(monitor);
     this.setup(window);
   }
 

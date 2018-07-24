@@ -10,7 +10,7 @@ export function testDragBackendFactory(): DragBackendFactory {
 
 export class TestDragBackend extends DragBackend {
   constructor(monitor: DragMonitor) {
-    super();
+    super(monitor);
   }
 
   connectDragSource(sourceId: string, node: any): Unsubscribe {
