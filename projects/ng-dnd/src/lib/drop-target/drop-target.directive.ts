@@ -26,6 +26,7 @@ export class DropTarget implements AfterViewInit, OnChanges, OnDestroy {
 
   @Input() itemType!: string | string[];
   @Input() canDrop: any = true;
+  @Input() dropEffect: 'copy' | 'move' | 'link' | 'none' = 'copy';
   @Output() hovered = new EventEmitter<any>();
   @Output() dropped = new EventEmitter<any>();
   @Output() dragging = new EventEmitter<boolean>();

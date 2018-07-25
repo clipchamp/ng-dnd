@@ -15,6 +15,7 @@ export class Html5DragBackend extends DragBackend {
   private dragOverTargetId: string[] | null = null;
   private dropTargetId: string[] | null = null;
   private activeTargetId: string | null = null;
+  private currentSourceOffset: any = null;
 
   constructor(monitor: DragMonitor) {
     super(monitor);
@@ -97,11 +98,12 @@ export class Html5DragBackend extends DragBackend {
         if (activeSourceId) {
           this.handleGlobalDragEnd(event);
         }
+        this.currentSourceOffset = getSourceOffset(target, clientOffset);
         this.eventStream.next({
           type: DragBackendEventType.DRAG_START,
           sourceId,
           clientOffset,
-          sourceOffset: getSourceOffset(target, clientOffset)
+          sourceOffset: this.currentSourceOffset
         });
         try {
           const previewImage = this.monitor.getPreviewImageForSourceId(sourceId);
@@ -122,12 +124,17 @@ export class Html5DragBackend extends DragBackend {
   }
 
   private handleGlobalDragEnd(event: DragEvent): void {
-    const { activeSourceId: sourceId, activeTargetId: targetId } = this;
+    const {
+      activeSourceId: sourceId,
+      activeTargetId: targetId,
+      currentSourceOffset: sourceOffset
+    } = this;
     this.activeSourceId = null;
     this.activeTargetId = null;
     this.dragStartSourceId = null;
     this.dragOverTargetId = null;
     this.dropTargetId = null;
+    this.currentSourceOffset = null;
     const clientOffset = getEventClientOffset(event);
     this.eventStream.next({
       type: DragBackendEventType.DRAG_END,
@@ -138,6 +145,7 @@ export class Html5DragBackend extends DragBackend {
       this.eventStream.next({
         type: DragBackendEventType.DRAG_OUT,
         clientOffset,
+        sourceOffset,
         sourceId,
         targetId
       });
@@ -146,7 +154,11 @@ export class Html5DragBackend extends DragBackend {
 
   private handleGlobalDragOver(event: DragEvent): void {
     const clientOffset = getEventClientOffset(event);
-    const { dragOverTargetId: targetIds, activeSourceId: sourceId } = this;
+    const {
+      dragOverTargetId: targetIds,
+      activeSourceId: sourceId,
+      currentSourceOffset: sourceOffset
+    } = this;
     this.dragOverTargetId = null;
     if (targetIds) {
       for (let i = targetIds.length - 1; i >= 0; i--) {
@@ -157,14 +169,17 @@ export class Html5DragBackend extends DragBackend {
             this.eventStream.next({
               type: DragBackendEventType.DRAG_OUT,
               clientOffset,
+              sourceOffset,
               targetId: this.activeTargetId,
               sourceId
             });
           }
           this.activeTargetId = targetId;
+          event.dataTransfer.dropEffect = this.monitor.getDropEffectForTargetId(targetId);
           this.eventStream.next({
             type: DragBackendEventType.DRAG_OVER,
             clientOffset,
+            sourceOffset,
             targetId,
             sourceId
           });
@@ -177,6 +192,7 @@ export class Html5DragBackend extends DragBackend {
       this.eventStream.next({
         type: DragBackendEventType.DRAG_OUT,
         clientOffset,
+        sourceOffset,
         targetId: this.activeTargetId,
         sourceId
       });
@@ -184,15 +200,22 @@ export class Html5DragBackend extends DragBackend {
     }
     this.eventStream.next({
       type: DragBackendEventType.DRAG_OVER,
+      sourceOffset,
       clientOffset,
       sourceId
     });
   }
 
   private handleGlobalDrop(event: DragEvent): void {
-    const { dropTargetId: targetIds, activeSourceId: sourceId, activeTargetId } = this;
+    const {
+      dropTargetId: targetIds,
+      activeSourceId: sourceId,
+      activeTargetId,
+      currentSourceOffset: sourceOffset
+    } = this;
     this.activeTargetId = null;
     this.dropTargetId = null;
+    this.currentSourceOffset = null;
     if (!targetIds) {
       return;
     }
@@ -205,6 +228,7 @@ export class Html5DragBackend extends DragBackend {
         this.eventStream.next({
           type: DragBackendEventType.DROP,
           clientOffset,
+          sourceOffset,
           targetId,
           sourceId
         });
@@ -216,6 +240,7 @@ export class Html5DragBackend extends DragBackend {
       this.eventStream.next({
         type: DragBackendEventType.DRAG_OUT,
         clientOffset,
+        sourceOffset,
         targetId: activeTargetId,
         sourceId
       });

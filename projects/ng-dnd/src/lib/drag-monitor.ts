@@ -36,4 +36,12 @@ export class DragMonitor {
     }
     return undefined;
   }
+
+  getDropEffectForTargetId(targetId: string): string {
+    const target = this.registry.getTarget(targetId);
+    if (!target) {
+      return 'none';
+    }
+    return target.dropEffect;
+  }
 }
