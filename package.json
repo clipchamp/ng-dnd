@@ -12,7 +12,7 @@
     "build": "ng build ng-dnd",
     "build:doc": "ng build",
     "test": "ng test ng-dnd",
-    "test:ci": "ng test ng-dnd --watch=false --browsers=ChromeHeadless",
+    "test:ci": "ng test ng-dnd --watch=false --browsers=ChromeHeadless --code-coverage",
     "test:doc": "ng test",
     "lint": "ng lint ng-dnd",
     "lint:doc": "ng lint",
