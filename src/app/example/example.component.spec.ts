@@ -1,6 +1,9 @@
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { ExampleComponent } from './example.component';
+import { ExampleSourceDirective } from './example-source.directive';
+import { ExampleTitleDirective } from './example-title.directive';
 
 describe('ExampleComponent', () => {
   let component: ExampleComponent;
@@ -8,9 +11,9 @@ describe('ExampleComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ ExampleComponent ]
-    })
-    .compileComponents();
+      declarations: [ExampleComponent, ExampleSourceDirective, ExampleTitleDirective],
+      schemas: [NO_ERRORS_SCHEMA]
+    }).compileComponents();
   }));
 
   beforeEach(() => {
