@@ -11,7 +11,7 @@
     "start": "ng serve",
     "build": "ng build ng-dnd",
     "build:doc": "ng build",
-    "test": "ng test ng-dnd",
+    "test": "ng test ng-dnd --browsers ChromeNoSandbox --watch false",
     "test:doc": "ng test",
     "lint": "ng lint ng-dnd",
     "lint:doc": "ng lint",
