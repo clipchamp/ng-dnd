@@ -2,10 +2,10 @@ import { TestBed, ComponentFixture } from '@angular/core/testing';
 import { DragSource } from './drag-source.directive';
 import { Component, DebugElement } from '@angular/core';
 import { By } from '@angular/platform-browser';
-import { DragDispatcher2 } from './drag-dispatcher.service';
+import { DragDispatcher2 } from '../drag-dispatcher.service';
 import { Subject } from 'rxjs';
-import { DragBackendEvent } from './backends/drag-backend-event';
-import { DragBackendEventType } from './backends/drag-backend-event-type';
+import { DragBackendEvent } from '../backends/drag-backend-event';
+import { DragBackendEventType } from '../backends/drag-backend-event-type';
 import { take } from 'rxjs/operators';
 
 @Component({
@@ -42,9 +42,7 @@ describe('DragSource', () => {
 
     eventStream = new Subject<DragBackendEvent>();
     dispatcher = TestBed.get(DragDispatcher2);
-    connectSpy = spyOn(dispatcher, 'connectDragSource').and.returnValue(
-      eventStream.asObservable()
-    );
+    connectSpy = spyOn(dispatcher, 'connectDragSource').and.returnValue(eventStream.asObservable());
 
     fixture = TestBed.createComponent(TestHostComponent);
     component = fixture.componentInstance;
@@ -65,10 +63,7 @@ describe('DragSource', () => {
   });
 
   it('should deregister itself when destroyed', (done: any) => {
-    const disconnectSpy = spyOn(
-      dispatcher,
-      'disconnectDragSource'
-    ).and.callThrough();
+    const disconnectSpy = spyOn(dispatcher, 'disconnectDragSource').and.callThrough();
     (source as any).eventStream.subscribe(
       () => {},
       () => {},
