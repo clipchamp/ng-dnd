@@ -9,9 +9,12 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build",
-    "test": "ng test",
-    "lint": "ng lint",
+    "build": "ng build ng-dnd",
+    "build:doc": "ng build",
+    "test": "ng test ng-dnd",
+    "test:doc": "ng test",
+    "lint": "ng lint ng-dnd",
+    "lint:doc": "ng lint",
     "e2e": "ng e2e",
     "generate:docs": "ng build --prod --output-path=docs --base-href https://clipchamp.github.io/ng-dnd/"
   },
