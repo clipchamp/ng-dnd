@@ -5,10 +5,6 @@ import { Unsubscribe } from './unsubscribe';
 import { DragBackendFactory } from './drag-backend-factory';
 import { DragMonitor } from '../drag-monitor';
 
-export function html5DragBackendFactory(): DragBackendFactory {
-  return (monitor: DragMonitor) => new Html5DragBackend(monitor);
-}
-
 export class Html5DragBackend extends DragBackend {
   private dragStartSourceId: string[] | null = null;
   private activeSourceId: string | null = null;
@@ -267,4 +263,8 @@ export class Html5DragBackend extends DragBackend {
     }
     this.dropTargetId.unshift(targetId);
   }
+}
+
+export function html5DragBackendFactory(): DragBackendFactory {
+  return (monitor: DragMonitor) => new Html5DragBackend(monitor);
 }

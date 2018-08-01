@@ -4,10 +4,6 @@ import { Unsubscribe } from './unsubscribe';
 import { DragBackendFactory } from './drag-backend-factory';
 import { DragBackendEvent } from './drag-backend-event';
 
-export function testDragBackendFactory(): DragBackendFactory {
-  return (monitor: DragMonitor) => new TestDragBackend(monitor);
-}
-
 export class TestDragBackend extends DragBackend {
   constructor(monitor: DragMonitor) {
     super(monitor);
@@ -24,4 +20,8 @@ export class TestDragBackend extends DragBackend {
   publish(event: DragBackendEvent): void {
     this.eventStream.next(event);
   }
+}
+
+export function testDragBackendFactory(): DragBackendFactory {
+  return (monitor: DragMonitor) => new TestDragBackend(monitor);
 }
