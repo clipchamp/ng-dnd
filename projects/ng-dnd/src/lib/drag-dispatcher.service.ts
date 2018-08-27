@@ -40,7 +40,7 @@ export class DragDispatcher2 {
     this.unsubscribes.set(dragSource, this.backend.connectDragSource(id, node));
     const dragSourceEventStream$ = this.backend.eventStream$.pipe(
       filter(event => event.sourceId === id),
-      map(event => ({ ...event, item: dragSource.item }))
+      map(event => ({ ...event, item: dragSource.item, itemType: dragSource.itemType }))
     );
     if (!!dragSource.dragPreview && dragSource.dragPreview instanceof TemplateRef) {
       this.setupDragPreviewForDragSource(dragSourceEventStream$, dragSource.dragPreview);
@@ -68,14 +68,20 @@ export class DragDispatcher2 {
       map(({ sourceId, targetId, files, strings, ...event }) => {
         if (sourceId) {
           if (sourceId === NATIVE_FILE) {
-            return { ...event, item: files, target: dropTarget };
+            return { ...event, item: files, itemType: sourceId, target: dropTarget };
           }
           if (sourceId === NATIVE_STRING) {
-            return { ...event, item: strings, target: dropTarget };
+            return { ...event, item: strings, itemType: sourceId, target: dropTarget };
           }
           const source = this.registry.getSource(sourceId);
           if (source) {
-            return { ...event, item: source.item, source, target: dropTarget };
+            return {
+              ...event,
+              item: source.item,
+              source,
+              itemType: source.itemType,
+              target: dropTarget
+            };
           }
         }
         return event;

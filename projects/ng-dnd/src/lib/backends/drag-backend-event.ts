@@ -10,6 +10,7 @@ export interface DragBackendEvent {
   targetId?: string;
   target?: DropTarget;
   item?: any;
+  itemType?: string;
   clientOffset: Coordinates;
   sourceOffset?: any;
   files?: File[];
