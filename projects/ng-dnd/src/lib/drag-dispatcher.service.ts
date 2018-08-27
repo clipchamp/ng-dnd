@@ -106,7 +106,7 @@ export class DragDispatcher2 {
         const source = this.registry.getSource(event.sourceId);
         return (
           (source && itemType.indexOf(source.itemType) > -1) ||
-          (!source && itemType.indexOf(NATIVE_FILE) > -1)
+          (!source && itemType.indexOf(event.sourceId) > -1)
         );
       }),
       map(event => event.type === DragBackendEventType.DRAG_START)

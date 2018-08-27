@@ -4,7 +4,7 @@ import { getEventClientOffset, getDragPreviewOffset, getSourceOffset } from './o
 import { Unsubscribe } from './unsubscribe';
 import { DragBackendFactory } from './drag-backend-factory';
 import { DragMonitor } from '../drag-monitor';
-import { NATIVE_FILE, getDroppedFiles } from '../utils/native-file';
+import { NATIVE_FILE, getNativeFiles, getNativeItemType, NATIVE_URL, getNativeStrings } from '../utils/native-file';
 
 export class Html5DragBackend extends DragBackend {
   private dragStartSourceId: string[] | null = null;
@@ -89,10 +89,10 @@ export class Html5DragBackend extends DragBackend {
     this.dragStartSourceId = null;
     const clientOffset = getEventClientOffset(event);
     if (!sourceIds) {
-      this.activeSourceId = NATIVE_FILE;
+      this.activeSourceId = getNativeItemType(event.dataTransfer);
       this.eventStream.next({
         type: DragBackendEventType.DRAG_START,
-        sourceId: NATIVE_FILE,
+        sourceId: this.activeSourceId,
         clientOffset
       });
       event.preventDefault();
@@ -162,6 +162,7 @@ export class Html5DragBackend extends DragBackend {
   }
 
   private handleGlobalDragOver(event: DragEvent): void {
+    console.warn('test');
     if (this.nativeFileDragTimeout) {
       clearTimeout(this.nativeFileDragTimeout);
       this.nativeFileDragTimeout = undefined;
@@ -244,13 +245,24 @@ export class Html5DragBackend extends DragBackend {
       const canDrop = this.monitor.canDrop(targetId, sourceId);
       if (canDrop) {
         this.activeSourceId = null;
+        if (sourceId === NATIVE_URL {
+          this.eventStream.next({
+            type: DragBackendEventType.DROP,
+            clientOffset,
+            sourceOffset,
+            targetId,
+            sourceId,
+            files: getNativeStrings(event.dataTransfer)
+          });
+          return;
+        })
         this.eventStream.next({
           type: DragBackendEventType.DROP,
           clientOffset,
           sourceOffset,
           targetId,
           sourceId,
-          files: sourceId === NATIVE_FILE ? getDroppedFiles(event.dataTransfer) : undefined
+          files: sourceId === NATIVE_FILE ? getNativeFiles(event.dataTransfer) : undefined
         });
         return;
       }
@@ -267,7 +279,7 @@ export class Html5DragBackend extends DragBackend {
   }
 
   private handleGlobalDragLeave(e: DragEvent): void {
-    if (this.activeSourceId === NATIVE_FILE) {
+    if (this.activeSourceId === NATIVE_FILE || this.activeSourceId === NATIVE_URL) {
       if (this.nativeFileDragTimeout) {
         clearTimeout(this.nativeFileDragTimeout);
       }
