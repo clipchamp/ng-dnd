@@ -11,6 +11,7 @@ import { DropTarget } from './drop-target/drop-target.directive';
 import { DragRegistry } from './drag-registry';
 import { DragMonitor } from './drag-monitor';
 import { coerceArray } from './utils/coercion';
+import { NATIVE_FILE } from './utils/native-file';
 
 @Injectable()
 export class DragDispatcher2 {
@@ -64,8 +65,11 @@ export class DragDispatcher2 {
     this.unsubscribes.set(dropTarget, this.backend.connectDropTarget(id, node));
     return this.backend.eventStream$.pipe(
       filter(event => event.targetId === id),
-      map(({ sourceId, targetId, ...event }) => {
+      map(({ sourceId, targetId, files, ...event }) => {
         if (sourceId) {
+          if (sourceId === NATIVE_FILE) {
+            return { ...event, item: files, target: dropTarget };
+          }
           const source = this.registry.getSource(sourceId);
           if (source) {
             return { ...event, item: source.item, source, target: dropTarget };
@@ -100,7 +104,10 @@ export class DragDispatcher2 {
       ),
       filter(event => {
         const source = this.registry.getSource(event.sourceId);
-        return source && itemType.indexOf(source.itemType) > -1;
+        return (
+          (source && itemType.indexOf(source.itemType) > -1) ||
+          (!source && itemType.indexOf(NATIVE_FILE) > -1)
+        );
       }),
       map(event => event.type === DragBackendEventType.DRAG_START)
     );

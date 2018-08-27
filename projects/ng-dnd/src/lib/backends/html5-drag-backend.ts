@@ -4,6 +4,7 @@ import { getEventClientOffset, getDragPreviewOffset, getSourceOffset } from './o
 import { Unsubscribe } from './unsubscribe';
 import { DragBackendFactory } from './drag-backend-factory';
 import { DragMonitor } from '../drag-monitor';
+import { NATIVE_FILE, getDroppedFiles } from '../utils/native-file';
 
 export class Html5DragBackend extends DragBackend {
   private dragStartSourceId: string[] | null = null;
@@ -12,6 +13,7 @@ export class Html5DragBackend extends DragBackend {
   private dropTargetId: string[] | null = null;
   private activeTargetId: string | null = null;
   private currentSourceOffset: any = null;
+  private nativeFileDragTimeout?: any;
 
   constructor(monitor: DragMonitor) {
     super(monitor);
@@ -66,6 +68,8 @@ export class Html5DragBackend extends DragBackend {
     eventTarget.addEventListener('dragend', handleDragEnd);
     const handleDragOver = (e: DragEvent) => this.handleGlobalDragOver(e);
     eventTarget.addEventListener('dragover', handleDragOver);
+    const handleLeave = (e: DragEvent) => this.handleGlobalDragLeave(e);
+    eventTarget.addEventListener('dragleave', handleLeave);
     const handleDrop = (e: DragEvent) => this.handleGlobalDrop(e);
     eventTarget.addEventListener('drop', handleDrop);
     this.teardown = () => {
@@ -75,6 +79,7 @@ export class Html5DragBackend extends DragBackend {
       eventTarget.removeEventListener('dragstart', handleDragStart);
       eventTarget.removeEventListener('dragend', handleDragEnd);
       eventTarget.removeEventListener('dragover', handleDragOver);
+      eventTarget.removeEventListener('dragleave', handleLeave);
       eventTarget.removeEventListener('drop', handleDrop);
     };
   }
@@ -82,10 +87,17 @@ export class Html5DragBackend extends DragBackend {
   private handleGlobalDragStart(event: DragEvent): void {
     const { dragStartSourceId: sourceIds, activeSourceId } = this;
     this.dragStartSourceId = null;
+    const clientOffset = getEventClientOffset(event);
     if (!sourceIds) {
+      this.activeSourceId = NATIVE_FILE;
+      this.eventStream.next({
+        type: DragBackendEventType.DRAG_START,
+        sourceId: NATIVE_FILE,
+        clientOffset
+      });
+      event.preventDefault();
       return;
     }
-    const clientOffset = getEventClientOffset(event);
     const { dataTransfer, target } = event;
     for (let i = sourceIds.length - 1; i >= 0; i--) {
       const sourceId = sourceIds[i];
@@ -149,7 +161,14 @@ export class Html5DragBackend extends DragBackend {
   }
 
   private handleGlobalDragOver(event: DragEvent): void {
+    if (this.nativeFileDragTimeout) {
+      clearTimeout(this.nativeFileDragTimeout);
+      this.nativeFileDragTimeout = undefined;
+    }
     const clientOffset = getEventClientOffset(event);
+    if (!this.activeSourceId) {
+      return this.handleGlobalDragStart(event);
+    }
     const {
       dragOverTargetId: targetIds,
       activeSourceId: sourceId,
@@ -226,7 +245,8 @@ export class Html5DragBackend extends DragBackend {
           clientOffset,
           sourceOffset,
           targetId,
-          sourceId
+          sourceId,
+          files: sourceId === NATIVE_FILE ? getDroppedFiles(event.dataTransfer) : undefined
         });
         event.preventDefault();
         return;
@@ -240,6 +260,15 @@ export class Html5DragBackend extends DragBackend {
         targetId: activeTargetId,
         sourceId
       });
+    }
+  }
+
+  private handleGlobalDragLeave(e: DragEvent): void {
+    if (this.activeSourceId === NATIVE_FILE) {
+      if (this.nativeFileDragTimeout) {
+        clearTimeout(this.nativeFileDragTimeout);
+      }
+      this.nativeFileDragTimeout = setTimeout(() => this.handleGlobalDragEnd(e), 100);
     }
   }
 

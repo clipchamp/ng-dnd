@@ -1,6 +1,7 @@
 import { TemplateRef } from '@angular/core';
 import { DragRegistry } from './drag-registry';
 import { getEmptyImage } from './utils/get-empty-image';
+import { NATIVE_FILE } from './utils/native-file';
 
 export class DragMonitor {
   constructor(private readonly registry: DragRegistry) {}
@@ -10,8 +11,11 @@ export class DragMonitor {
     return !!source && source.canDrag;
   }
 
-  canDrop(targetId: string, sourceId): boolean {
+  canDrop(targetId: string, sourceId: string): boolean {
     const target = this.registry.getTarget(targetId);
+    if (sourceId === NATIVE_FILE) {
+      return !!target && target.itemType.indexOf(sourceId) > -1;
+    }
     const source = this.registry.getSource(sourceId);
     return (
       !!target &&
