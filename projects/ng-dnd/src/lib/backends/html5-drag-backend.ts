@@ -96,6 +96,7 @@ export class Html5DragBackend extends DragBackend {
         clientOffset
       });
       event.preventDefault();
+      event.dataTransfer.dropEffect = 'none';
       return;
     }
     const { dataTransfer, target } = event;
@@ -190,7 +191,6 @@ export class Html5DragBackend extends DragBackend {
             });
           }
           this.activeTargetId = targetId;
-          event.dataTransfer.dropEffect = this.monitor.getDropEffectForTargetId(targetId);
           this.eventStream.next({
             type: DragBackendEventType.DRAG_OVER,
             clientOffset,
@@ -199,6 +199,7 @@ export class Html5DragBackend extends DragBackend {
             sourceId
           });
           event.preventDefault();
+          event.dataTransfer.dropEffect = this.monitor.getDropEffectForTargetId(targetId);
           return;
         }
       }
@@ -219,9 +220,12 @@ export class Html5DragBackend extends DragBackend {
       clientOffset,
       sourceId
     });
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'none';
   }
 
   private handleGlobalDrop(event: DragEvent): void {
+    event.preventDefault();
     const {
       dropTargetId: targetIds,
       activeSourceId: sourceId,
@@ -248,7 +252,6 @@ export class Html5DragBackend extends DragBackend {
           sourceId,
           files: sourceId === NATIVE_FILE ? getDroppedFiles(event.dataTransfer) : undefined
         });
-        event.preventDefault();
         return;
       }
     }
