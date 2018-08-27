@@ -13,4 +13,5 @@ export interface DragBackendEvent {
   clientOffset: Coordinates;
   sourceOffset?: any;
   files?: File[];
+  strings?: string[];
 }

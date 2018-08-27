@@ -1,5 +1,5 @@
 export const NATIVE_FILE = '__FILE__';
-export const NATIVE_URL = '__URL__';
+export const NATIVE_STRING = '__STRING__';
 
 export function getNativeItemType(dataTransfer: DataTransfer): string {
   if (dataTransfer.files.length > 0) {
@@ -12,7 +12,7 @@ export function getNativeItemType(dataTransfer: DataTransfer): string {
       }
     }
   }
-  return NATIVE_URL;
+  return NATIVE_STRING;
 }
 
 export function getNativeFiles(dataTransfer: DataTransfer): File[] {
@@ -33,4 +33,18 @@ export function getNativeFiles(dataTransfer: DataTransfer): File[] {
   return files;
 }
 
-export function getNativeStrings(dataTransfer: DataTransfer): string[] {}
+export function getNativeStrings(dataTransfer: DataTransfer): Promise<string[]> {
+  const promises = [];
+  if (dataTransfer.items) {
+    for (let j = 0; j < dataTransfer.items.length; j++) {
+      if (dataTransfer.items[j].kind === 'string' && dataTransfer.items[j].type === 'text/plain') {
+        promises.push(
+          new Promise<string>(resolve => {
+            dataTransfer.items[j].getAsString(string => resolve(string));
+          })
+        );
+      }
+    }
+  }
+  return Promise.all<string>(promises);
+}

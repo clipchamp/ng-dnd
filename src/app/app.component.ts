@@ -42,7 +42,8 @@ export class AppComponent {
   }
 
   targetData: any;
-  nativeFileDrops: any[] = [];
+  nativeFileDrops: File[] = [];
+  nativeStringDrops: string[] = [];
 
   private _targetData: any;
   private itemBounds: any[] = [];
@@ -154,6 +155,12 @@ export class AppComponent {
   onNativeFileDrop(event: any): void {
     if (Array.isArray(event.item)) {
       this.nativeFileDrops = [...this.nativeFileDrops, ...event.item];
+    }
+  }
+
+  onNativeStringDrop(event: any): void {
+    if (Array.isArray(event.item)) {
+      this.nativeStringDrops = [...this.nativeStringDrops, ...event.item];
     }
   }
 
