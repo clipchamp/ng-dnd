@@ -42,6 +42,7 @@ export class AppComponent {
   }
 
   targetData: any;
+  nativeFileDrops: any[] = [];
 
   private _targetData: any;
   private itemBounds: any[] = [];
@@ -148,6 +149,12 @@ export class AppComponent {
     this.cdRef.detectChanges();
 
     this.calculateBounds();
+  }
+
+  onNativeFileDrop(event: any): void {
+    if (Array.isArray(event.item)) {
+      this.nativeFileDrops = [...this.nativeFileDrops, ...event.item];
+    }
   }
 
   trackByFn(index: number, item: any): any {

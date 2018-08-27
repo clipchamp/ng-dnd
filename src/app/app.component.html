@@ -83,5 +83,19 @@
       </div>
       <cc-drag-layer></cc-drag-layer>
     </cc-example>
+    <cc-example label="Native file drag">
+      <div class="drop-target"
+        ccDropTarget
+        [itemType]="['__FILE__']"
+        ccDropTargetOver="drop-target-over"
+        ccDropTargetDragging="drop-target-dragging"
+        (dropped)="onNativeFileDrop($event)">
+        <mat-card class="drag-source"
+          *ngFor="let drop of nativeFileDrops">
+          {{ drop.name }}
+        </mat-card>
+        <mat-icon *ngIf="nativeFileDrops.length < 1">add</mat-icon>
+      </div>
+    </cc-example>
   </mat-drawer-content>
 </mat-drawer-container>
