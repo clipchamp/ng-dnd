@@ -8,7 +8,7 @@ import {
 import { MatIconRegistry } from '@angular/material';
 import { DomSanitizer } from '@angular/platform-browser';
 import { registerIcons } from './icons';
-import { DragSource } from 'projects/ng-dnd/src/public_api';
+import { DragSource, DragDispatcher2 } from 'projects/ng-dnd/src/public_api';
 
 function splice<T extends { id: string }>(index: number, array: T[], newItem: T): T[] {
   return [
@@ -53,7 +53,8 @@ export class AppComponent {
   constructor(
     iconRegistry: MatIconRegistry,
     sanitizer: DomSanitizer,
-    private cdRef: ChangeDetectorRef
+    private cdRef: ChangeDetectorRef,
+    private dragDispatcher: DragDispatcher2
   ) {
     registerIcons(iconRegistry, sanitizer);
     this.originalTargetData = [
@@ -108,9 +109,11 @@ export class AppComponent {
         ...target,
         children: splice(index, target.children, item)
       });
+      this.dragDispatcher.toggleDragPreviews(false);
       this.cdRef.detectChanges();
     } else if (this._targetData !== this.targetData) {
       this.targetData = this._targetData;
+      this.dragDispatcher.toggleDragPreviews(true);
       this.cdRef.detectChanges();
     }
   }

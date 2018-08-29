@@ -1,5 +1,5 @@
 import { Injectable, TemplateRef, Inject, Optional } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, BehaviorSubject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 import { DragBackend } from './backends/drag-backend';
 import { DragBackendEvent } from './backends/drag-backend-event';
@@ -15,12 +15,15 @@ import { NATIVE_FILE, NATIVE_STRING } from './utils/native-file';
 
 @Injectable()
 export class DragDispatcher2 {
+  dragPreviewsEnabled$: Observable<boolean>;
+
   private idCounter = 0;
   private readonly registry = new DragRegistry();
   private readonly monitor = new DragMonitor(this.registry);
   private readonly backend: DragBackend = null;
   private dragLayer?: DragLayer;
   private readonly unsubscribes = new WeakMap<any, any>();
+  private dragPreviewsEnabled = new BehaviorSubject<boolean>(true);
 
   constructor(
     @Optional()
@@ -31,6 +34,7 @@ export class DragDispatcher2 {
       throw new Error('No drag backend provided');
     }
     this.backend = backendFactory(this.monitor);
+    this.dragPreviewsEnabled$ = this.dragPreviewsEnabled.asObservable();
   }
 
   connectDragSource(dragSource: DragSource, node: any): Observable<DragBackendEvent> {
@@ -183,5 +187,11 @@ export class DragDispatcher2 {
         // tslint:disable-next-line:no-non-null-assertion
         this.dragLayer!.hidePreview(event.sourceId);
       });
+  }
+
+  toggleDragPreviews(value?: boolean): void {
+    this.dragPreviewsEnabled.next(
+      value !== undefined ? value : !this.dragPreviewsEnabled.getValue()
+    );
   }
 }
