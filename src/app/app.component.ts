@@ -109,11 +109,9 @@ export class AppComponent {
         ...target,
         children: splice(index, target.children, item)
       });
-      this.dragDispatcher.toggleDragPreviews(false);
       this.cdRef.detectChanges();
     } else if (this._targetData !== this.targetData) {
       this.targetData = this._targetData;
-      this.dragDispatcher.toggleDragPreviews(true);
       this.cdRef.detectChanges();
     }
   }
