@@ -13,6 +13,7 @@ import {
 } from '../utils/native-file';
 
 export class Html5DragBackend extends DragBackend {
+  private sourceNodes = new Map<string, Element>();
   private dragStartSourceId: string[] | null = null;
   private activeSourceId: string | null = null;
   private dragOverTargetId: string[] | null = null;
@@ -33,6 +34,7 @@ export class Html5DragBackend extends DragBackend {
     if (!node) {
       return () => {};
     }
+    this.sourceNodes.set(sourceId, node);
     node.setAttribute('draggable', true);
     const handleDragStart = () => this.handleDragStart(sourceId);
     node.addEventListener('dragstart', handleDragStart);
@@ -40,6 +42,7 @@ export class Html5DragBackend extends DragBackend {
     node.addEventListener('dragover', doNothing);
     node.addEventListener('drop', doNothing);
     return () => {
+      this.sourceNodes.delete(sourceId);
       node.setAttribute('draggable', false);
       node.removeEventListener('dragstart', handleDragStart);
       node.removeEventListener('dragover', doNothing);
@@ -79,6 +82,7 @@ export class Html5DragBackend extends DragBackend {
     const handleDrop = (e: DragEvent) => this.handleGlobalDrop(e);
     eventTarget.addEventListener('drop', handleDrop);
     this.teardown = () => {
+      this.sourceNodes.clear();
       if (!eventTarget) {
         return;
       }
@@ -112,7 +116,10 @@ export class Html5DragBackend extends DragBackend {
         if (activeSourceId) {
           this.handleGlobalDragEnd(event);
         }
-        this.currentSourceOffset = getSourceOffset(target, clientOffset);
+        this.currentSourceOffset = getSourceOffset(
+          this.sourceNodes.get(sourceId) || target,
+          clientOffset
+        );
         this.eventStream.next({
           type: DragBackendEventType.DRAG_START,
           sourceId,
