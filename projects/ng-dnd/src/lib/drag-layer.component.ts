@@ -63,7 +63,9 @@ export class DragLayer implements AfterViewInit {
     };
     this.cdRef.detectChanges();
     requestAnimationFrame(() => {
-      this.previews[id].show = true;
+      if (this.previews[id]) {
+        this.previews[id].show = true;
+      }
     });
   }
 
