@@ -3,13 +3,13 @@ import { Coordinates } from './offset';
 import { DragSource } from '../drag-source';
 import { DropTarget } from '../drop-target';
 
-export interface DragBackendEvent {
+export interface DragBackendEvent<T = any> {
   type: DragBackendEventType;
   sourceId?: string;
   source?: DragSource;
   targetId?: string;
   target?: DropTarget;
-  item?: any;
+  item?: T;
   itemType?: string;
   clientOffset: Coordinates;
   sourceOffset?: any;
