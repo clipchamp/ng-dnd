@@ -1,4 +1,6 @@
+import { NgZone } from '@angular/core';
 import { DragBackend } from './drag-backend';
+import { DragBackendEvent } from './drag-backend-event';
 import { DragBackendEventType } from './drag-backend-event-type';
 import { getEventClientOffset, getDragPreviewOffset, getSourceOffset } from './offset';
 import { Unsubscribe } from './unsubscribe';
@@ -22,8 +24,8 @@ export class Html5DragBackend extends DragBackend {
   private currentSourceOffset: any = null;
   private nativeFileDragTimeout?: any;
 
-  constructor(monitor: DragMonitor) {
-    super(monitor);
+  constructor(monitor: DragMonitor, ngZone: NgZone) {
+    super(monitor, ngZone);
     this.setup(window);
   }
 
@@ -34,19 +36,16 @@ export class Html5DragBackend extends DragBackend {
     if (!node) {
       return () => {};
     }
-    this.sourceNodes.set(sourceId, node);
-    node.setAttribute('draggable', true);
     const handleDragStart = () => this.handleDragStart(sourceId);
-    node.addEventListener('dragstart', handleDragStart);
-    const doNothing = () => {};
-    node.addEventListener('dragover', doNothing);
-    node.addEventListener('drop', doNothing);
+    this.ngZone.runOutsideAngular(() => {
+      this.sourceNodes.set(sourceId, node);
+      node.setAttribute('draggable', true);
+      node.addEventListener('dragstart', handleDragStart);
+    });
     return () => {
       this.sourceNodes.delete(sourceId);
       node.setAttribute('draggable', false);
       node.removeEventListener('dragstart', handleDragStart);
-      node.removeEventListener('dragover', doNothing);
-      node.removeEventListener('drop', doNothing);
       if (this.activeSourceId === sourceId) {
         this.handleGlobalDragEnd({ x: 0, y: 0 } as any);
       }
@@ -59,8 +58,10 @@ export class Html5DragBackend extends DragBackend {
     }
     const handleDragOver = () => this.handleDragOver(targetId);
     const handleDrop = () => this.handleDrop(targetId);
-    node.addEventListener('dragover', handleDragOver);
-    node.addEventListener('drop', handleDrop);
+    this.ngZone.runOutsideAngular(() => {
+      node.addEventListener('dragover', handleDragOver);
+      node.addEventListener('drop', handleDrop);
+    });
     return () => {
       node.removeEventListener('dragover', handleDragOver);
       node.removeEventListener('drop', handleDrop);
@@ -72,15 +73,17 @@ export class Html5DragBackend extends DragBackend {
       return;
     }
     const handleDragStart = (e: DragEvent) => this.handleGlobalDragStart(e);
-    eventTarget.addEventListener('dragstart', handleDragStart);
     const handleDragEnd = (e: DragEvent) => this.handleGlobalDragEnd(e);
-    eventTarget.addEventListener('dragend', handleDragEnd);
     const handleDragOver = (e: DragEvent) => this.handleGlobalDragOver(e);
-    eventTarget.addEventListener('dragover', handleDragOver);
     const handleLeave = (e: DragEvent) => this.handleGlobalDragLeave(e);
-    eventTarget.addEventListener('dragleave', handleLeave);
     const handleDrop = (e: DragEvent) => this.handleGlobalDrop(e);
-    eventTarget.addEventListener('drop', handleDrop);
+    this.ngZone.runOutsideAngular(() => {
+      eventTarget.addEventListener('dragstart', handleDragStart);
+      eventTarget.addEventListener('dragend', handleDragEnd);
+      eventTarget.addEventListener('dragover', handleDragOver);
+      eventTarget.addEventListener('dragleave', handleLeave);
+      eventTarget.addEventListener('drop', handleDrop);
+    });
     this.teardown = () => {
       this.sourceNodes.clear();
       if (!eventTarget) {
@@ -100,7 +103,7 @@ export class Html5DragBackend extends DragBackend {
     const clientOffset = getEventClientOffset(event);
     if (!sourceIds) {
       this.activeSourceId = getNativeItemType(event.dataTransfer);
-      this.eventStream.next({
+      this.emitEvent({
         type: DragBackendEventType.DRAG_START,
         sourceId: this.activeSourceId,
         clientOffset
@@ -120,7 +123,7 @@ export class Html5DragBackend extends DragBackend {
           this.sourceNodes.get(sourceId) || target,
           clientOffset
         );
-        this.eventStream.next({
+        this.emitEvent({
           type: DragBackendEventType.DRAG_START,
           sourceId,
           clientOffset,
@@ -157,13 +160,13 @@ export class Html5DragBackend extends DragBackend {
     this.dropTargetId = null;
     this.currentSourceOffset = null;
     const clientOffset = getEventClientOffset(event);
-    this.eventStream.next({
+    this.emitEvent({
       type: DragBackendEventType.DRAG_END,
       clientOffset,
       sourceId
     });
     if (targetId) {
-      this.eventStream.next({
+      this.emitEvent({
         type: DragBackendEventType.DRAG_OUT,
         clientOffset,
         sourceOffset,
@@ -194,7 +197,7 @@ export class Html5DragBackend extends DragBackend {
         const canDrop = this.monitor.canDrop(targetId, sourceId);
         if (canDrop) {
           if (this.activeTargetId && this.activeTargetId !== targetId) {
-            this.eventStream.next({
+            this.emitEvent({
               type: DragBackendEventType.DRAG_OUT,
               clientOffset,
               sourceOffset,
@@ -203,7 +206,7 @@ export class Html5DragBackend extends DragBackend {
             });
           }
           this.activeTargetId = targetId;
-          this.eventStream.next({
+          this.emitEvent({
             type: DragBackendEventType.DRAG_OVER,
             clientOffset,
             sourceOffset,
@@ -217,7 +220,7 @@ export class Html5DragBackend extends DragBackend {
       }
     }
     if (this.activeTargetId) {
-      this.eventStream.next({
+      this.emitEvent({
         type: DragBackendEventType.DRAG_OUT,
         clientOffset,
         sourceOffset,
@@ -226,7 +229,7 @@ export class Html5DragBackend extends DragBackend {
       });
       this.activeTargetId = null;
     }
-    this.eventStream.next({
+    this.emitEvent({
       type: DragBackendEventType.DRAG_OVER,
       sourceOffset,
       clientOffset,
@@ -258,7 +261,7 @@ export class Html5DragBackend extends DragBackend {
         this.activeSourceId = null;
         if (sourceId === NATIVE_STRING) {
           getNativeStrings(event.dataTransfer).then(strings => {
-            this.eventStream.next({
+            this.emitEvent({
               type: DragBackendEventType.DROP,
               clientOffset,
               sourceOffset,
@@ -269,7 +272,7 @@ export class Html5DragBackend extends DragBackend {
           });
           return;
         }
-        this.eventStream.next({
+        this.emitEvent({
           type: DragBackendEventType.DROP,
           clientOffset,
           sourceOffset,
@@ -281,7 +284,7 @@ export class Html5DragBackend extends DragBackend {
       }
     }
     if (activeTargetId) {
-      this.eventStream.next({
+      this.emitEvent({
         type: DragBackendEventType.DRAG_OUT,
         clientOffset,
         sourceOffset,
@@ -320,8 +323,14 @@ export class Html5DragBackend extends DragBackend {
     }
     this.dropTargetId.unshift(targetId);
   }
+
+  private emitEvent(event: DragBackendEvent): void {
+    this.ngZone.run(() => {
+      this.eventStream.next(event);
+    });
+  }
 }
 
 export function html5DragBackendFactory(): DragBackendFactory {
-  return (monitor: DragMonitor) => new Html5DragBackend(monitor);
+  return (monitor: DragMonitor, ngZone: NgZone) => new Html5DragBackend(monitor, ngZone);
 }

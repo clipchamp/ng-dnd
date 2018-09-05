@@ -7,7 +7,8 @@ import {
   OnDestroy,
   Output,
   TemplateRef,
-  Optional
+  Optional,
+  NgZone
 } from '@angular/core';
 import { Subject } from 'rxjs';
 import { distinctUntilChanged, filter, take, takeUntil, map } from 'rxjs/operators';

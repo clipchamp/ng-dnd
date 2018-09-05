@@ -1,10 +1,10 @@
-import { Injectable, TemplateRef, Inject, Optional } from '@angular/core';
+import { Injectable, TemplateRef, Inject, Optional, NgZone } from '@angular/core';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 import { DragBackend } from './backends/drag-backend';
 import { DragBackendEvent } from './backends/drag-backend-event';
 import { DragBackendEventType } from './backends/drag-backend-event-type';
-import { DRAG_BACKEND } from './backends/drag-backend-factory';
+import { DRAG_BACKEND, DragBackendFactory } from './backends/drag-backend-factory';
 import { DragLayer } from './drag-layer.component';
 import { DragSource } from './drag-source/drag-source.directive';
 import { DropTarget } from './drop-target/drop-target.directive';
@@ -28,12 +28,13 @@ export class DragDispatcher2 {
   constructor(
     @Optional()
     @Inject(DRAG_BACKEND)
-    private readonly backendFactory: any
+    private readonly backendFactory: DragBackendFactory,
+    ngZone: NgZone
   ) {
     if (!this.backendFactory) {
       throw new Error('No drag backend provided');
     }
-    this.backend = backendFactory(this.monitor);
+    this.backend = backendFactory(this.monitor, ngZone);
     this.dragPreviewsEnabled$ = this.dragPreviewsEnabled.asObservable();
   }
 
