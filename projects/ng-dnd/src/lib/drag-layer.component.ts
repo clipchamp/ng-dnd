@@ -8,8 +8,7 @@ import { Observable } from 'rxjs';
         <div class="drag-preview"
             [class.drag-preview--show]="preview.show"
             [class.drag-preview--hidden]="!(dragPreviewsEnabled$ | async)"
-            [style.left.px]="preview.context.position.x"
-            [style.top.px]="preview.context.position.y"
+            [style.transform]="transform(preview.context)"
             [style.width.px]="preview.context.width"
             [style.height.px]="preview.context.height"
             *ngFor="let preview of previewAsArray">
@@ -19,6 +18,8 @@ import { Observable } from 'rxjs';
     `
       .drag-preview {
         position: fixed;
+        left: 0;
+        top: 0;
         z-index: 9999;
         pointer-events: none;
         opacity: 0;
@@ -80,6 +81,13 @@ export class DragLayer implements AfterViewInit {
   hidePreview(id: string): void {
     delete this.previews[id];
     this.cdRef.detectChanges();
+  }
+
+  transform(context: any): string {
+    if (!context || !context.position) {
+      return 'none';
+    }
+    return `translate3d(${context.position.x}px, ${context.position.y}px, 0)`;
   }
 
   get previewAsArray(): { id: string; template: any; context: any; show: boolean }[] {
