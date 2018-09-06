@@ -1,8 +1,9 @@
-import { TemplateRef } from '@angular/core';
+import { TemplateRef, Injectable } from '@angular/core';
 import { DragRegistry } from './drag-registry';
 import { getEmptyImage } from './utils/get-empty-image';
 import { NATIVE_FILE, NATIVE_STRING } from './utils/native-file';
 
+@Injectable({ providedIn: 'root' })
 export class DragMonitor {
   constructor(private readonly registry: DragRegistry) {}
 

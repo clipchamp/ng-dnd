@@ -1,6 +1,8 @@
 import { DragSource } from './drag-source/drag-source.directive';
 import { DropTarget } from './drop-target/drop-target.directive';
+import { Injectable } from '@angular/core';
 
+@Injectable({ providedIn: 'root' })
 export class DragRegistry {
   private sources = new Map<string, DragSource>();
   private targets = new Map<string, DropTarget>();

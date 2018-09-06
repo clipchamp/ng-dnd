@@ -1,40 +1,32 @@
-import { Injectable, TemplateRef, Inject, Optional, NgZone } from '@angular/core';
+import { Injectable, TemplateRef, Optional } from '@angular/core';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 import { DragBackend } from './backends/drag-backend';
 import { DragBackendEvent } from './backends/drag-backend-event';
 import { DragBackendEventType } from './backends/drag-backend-event-type';
-import { DRAG_BACKEND, DragBackendFactory } from './backends/drag-backend-factory';
 import { DragLayer } from './drag-layer.component';
 import { DragSource } from './drag-source/drag-source.directive';
 import { DropTarget } from './drop-target/drop-target.directive';
 import { DragRegistry } from './drag-registry';
-import { DragMonitor } from './drag-monitor';
 import { coerceArray } from './utils/coercion';
 import { NATIVE_FILE, NATIVE_STRING } from './utils/native-file';
 
-@Injectable()
+@Injectable({ providedIn: 'root' })
 export class DragDispatcher2 {
   dragPreviewsEnabled$: Observable<boolean>;
 
   private idCounter = 0;
-  private readonly registry = new DragRegistry();
-  private readonly monitor = new DragMonitor(this.registry);
-  private readonly backend: DragBackend = null;
   private dragLayer?: DragLayer;
   private readonly unsubscribes = new WeakMap<any, any>();
   private dragPreviewsEnabled = new BehaviorSubject<boolean>(true);
 
   constructor(
-    @Optional()
-    @Inject(DRAG_BACKEND)
-    private readonly backendFactory: DragBackendFactory,
-    ngZone: NgZone
+    private readonly registry: DragRegistry,
+    @Optional() private readonly backend: DragBackend
   ) {
-    if (!this.backendFactory) {
+    if (!this.backend) {
       throw new Error('No drag backend provided');
     }
-    this.backend = backendFactory(this.monitor, ngZone);
     this.dragPreviewsEnabled$ = this.dragPreviewsEnabled.asObservable();
   }
 

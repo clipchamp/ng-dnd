@@ -11,7 +11,7 @@ import {
   MatCardModule
 } from '@angular/material';
 
-import { DragModule, html5DragBackendFactory, DRAG_BACKEND } from 'projects/ng-dnd/src/public_api';
+import { DragModule, HTML5_DRAG_BACKEND_PROVIDER } from 'projects/ng-dnd/src/public_api';
 import { AppComponent } from './app.component';
 import { ExampleModule } from './example/example.module';
 
@@ -31,12 +31,7 @@ import { ExampleModule } from './example/example.module';
     MatButtonModule,
     MatCardModule
   ],
-  providers: [
-    {
-      provide: DRAG_BACKEND,
-      useFactory: html5DragBackendFactory
-    }
-  ],
+  providers: [HTML5_DRAG_BACKEND_PROVIDER],
   bootstrap: [AppComponent]
 })
 export class AppModule {}

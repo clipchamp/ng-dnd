@@ -1,6 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ModuleWithProviders, NgModule } from '@angular/core';
-import { DragDispatcher2 } from './drag-dispatcher.service';
+import { NgModule } from '@angular/core';
 import { DragLayer } from './drag-layer.component';
 import { DragSource } from './drag-source/drag-source.directive';
 import { DragSourceDragging } from './drag-source/drag-source-dragging.directive';
@@ -24,20 +23,6 @@ const DECLARATIONS = [
 @NgModule({
   imports: [CommonModule],
   declarations: DECLARATIONS,
-  providers: [DragDispatcher2],
   exports: DECLARATIONS
 })
-export class DragModule {
-  static forFeature(): ModuleWithProviders {
-    return {
-      ngModule: DragModule,
-      providers: []
-    };
-  }
-  static forRoot(): ModuleWithProviders {
-    return {
-      ngModule: DragModule,
-      providers: [DragDispatcher2]
-    };
-  }
-}
+export class DragModule {}
