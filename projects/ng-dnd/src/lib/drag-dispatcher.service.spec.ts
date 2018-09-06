@@ -36,7 +36,7 @@ describe('DragDispatcher', () => {
   });
 
   it('should create a drag backend', () => {
-    expect(backendFactory).toHaveBeenCalledWith(jasmine.any(DragMonitor));
+    expect(backendFactory).toHaveBeenCalledWith(jasmine.any(DragMonitor), jasmine.any(NgZone));
     expect(backend).toBeTruthy();
   });
 });
