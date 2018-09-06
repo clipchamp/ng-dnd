@@ -1,4 +1,4 @@
-import { NgZone, Injectable } from '@angular/core';
+import { NgZone, Provider, Injectable } from '@angular/core';
 import { DragBackend } from './drag-backend';
 import { DragBackendEvent } from './drag-backend-event';
 import { DragBackendEventType } from './drag-backend-event-type';
@@ -13,7 +13,9 @@ import {
   getNativeStrings
 } from '../utils/native-file';
 
-@Injectable({ providedIn: 'root' })
+@Injectable({
+  providedIn: 'root'
+})
 export class Html5DragBackend extends DragBackend {
   private sourceNodes = new Map<string, Element>();
   private dragStartSourceId: string[] | null = null;
@@ -331,7 +333,7 @@ export class Html5DragBackend extends DragBackend {
   }
 }
 
-export const HTML5_DRAG_BACKEND_PROVIDER = {
+export const HTML5_DRAG_BACKEND_PROVIDER: Provider = {
   provide: DragBackend,
-  useClass: Html5DragBackend
+  useExisting: Html5DragBackend
 };
