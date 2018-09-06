@@ -1,7 +1,8 @@
-import { DragDispatcher2 } from './drag-dispatcher.service';
+import { NgZone } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { DRAG_BACKEND, DragBackendFactory } from './backends/drag-backend-factory';
 import { testDragBackendFactory, TestDragBackend } from './backends/test-drag-backend';
+import { DragDispatcher2 } from './drag-dispatcher.service';
 import { DragMonitor } from './drag-monitor';
 
 describe('DragDispatcher', () => {
@@ -10,10 +11,12 @@ describe('DragDispatcher', () => {
   let backendFactory: DragBackendFactory;
 
   beforeEach(() => {
-    backendFactory = jasmine.createSpy('backendFactory').and.callFake((monitor: DragMonitor) => {
-      backend = testDragBackendFactory()(monitor) as any;
-      return backend;
-    });
+    backendFactory = jasmine
+      .createSpy('backendFactory')
+      .and.callFake((monitor: DragMonitor, ngZone: NgZone) => {
+        backend = testDragBackendFactory()(monitor, ngZone) as any;
+        return backend;
+      });
 
     TestBed.configureTestingModule({
       providers: [
