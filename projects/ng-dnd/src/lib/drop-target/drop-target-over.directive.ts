@@ -2,7 +2,6 @@ import {
   Directive,
   AfterContentInit,
   Input,
-  OnChanges,
   Renderer2,
   ElementRef,
   OnDestroy,
@@ -15,15 +14,22 @@ import { Subscription } from 'rxjs';
   selector: '[ccDropTargetOver]',
   exportAs: 'ccDropTargetOver'
 })
-export class DropTargetIsOver implements AfterContentInit, OnChanges, OnDestroy {
+export class DropTargetIsOver implements AfterContentInit, OnDestroy {
   isActive = false;
 
   @ContentChild(DropTarget) target: DropTarget;
 
   @Input()
   set ccDropTargetOver(data: string[] | string) {
+    if (this.isActive && this.classList.length > 0) {
+      this.classList.map(c => {
+        this.renderer.removeClass(this.elementRef.nativeElement, c);
+      });
+      this.isActive = false;
+    }
     const classes = Array.isArray(data) ? data : data.split(' ');
     this.classList = classes.filter(c => !!c);
+    this.update();
   }
 
   private classList: string[] = [];
@@ -36,10 +42,6 @@ export class DropTargetIsOver implements AfterContentInit, OnChanges, OnDestroy 
       return;
     }
     this.subscription = this.target.hovered.subscribe(_ => this.update());
-    this.update();
-  }
-
-  ngOnChanges(): void {
     this.update();
   }
 

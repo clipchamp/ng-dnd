@@ -99,6 +99,7 @@ export class DropTarget implements AfterViewInit, OnChanges, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.subscription.unsubscribe();
     this.dragDispatcher.disconnectDropTarget(this);
     this.destroyed.next();
     this.destroyed.complete();

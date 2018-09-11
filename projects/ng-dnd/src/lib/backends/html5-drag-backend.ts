@@ -1,4 +1,4 @@
-import { NgZone, Provider, Injectable } from '@angular/core';
+import { NgZone, Provider, Injectable, OnDestroy } from '@angular/core';
 import { DragBackend } from './drag-backend';
 import { DragBackendEvent } from './drag-backend-event';
 import { DragBackendEventType } from './drag-backend-event-type';
@@ -16,7 +16,7 @@ import {
 @Injectable({
   providedIn: 'root'
 })
-export class Html5DragBackend extends DragBackend {
+export class Html5DragBackend extends DragBackend implements OnDestroy {
   private sourceNodes = new Map<string, Element>();
   private dragStartSourceId: string[] | null = null;
   private activeSourceId: string | null = null;
@@ -29,6 +29,11 @@ export class Html5DragBackend extends DragBackend {
   constructor(monitor: DragMonitor, ngZone: NgZone) {
     super(monitor, ngZone);
     this.setup(window);
+  }
+
+  ngOnDestroy(): void {
+    this.teardown();
+    this.eventStream.complete();
   }
 
   // Currently unused

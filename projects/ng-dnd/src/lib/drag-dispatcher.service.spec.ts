@@ -22,5 +22,7 @@ describe('DragDispatcher', () => {
 
   it('should create a drag backend', () => {
     expect(backend).toBeTruthy();
+    // Make sure we instantiated the test backend
+    expect(backend.publish).toBeTruthy();
   });
 });

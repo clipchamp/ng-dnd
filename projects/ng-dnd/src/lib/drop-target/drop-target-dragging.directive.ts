@@ -22,8 +22,16 @@ export class DropTargetDragging implements AfterContentInit, OnDestroy {
 
   @Input()
   set ccDropTargetDragging(data: string[] | string) {
+    const isActive = this.isActive;
+    if (this.isActive && this.classList.length > 0) {
+      this.classList.map(c => {
+        this.renderer.removeClass(this.elementRef.nativeElement, c);
+      });
+      this.isActive = false;
+    }
     const classes = Array.isArray(data) ? data : data.split(' ');
     this.classList = classes.filter(c => !!c);
+    this.update(isActive);
   }
 
   private classList: string[] = [];
