@@ -1,8 +1,9 @@
+import { TemplateRef, ElementRef, EmbeddedViewRef } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { DOCUMENT } from '@angular/common';
 import { DragMonitor } from './drag-monitor';
 import { DragRegistry } from './drag-registry';
-import { TemplateRef, ElementRef, EmbeddedViewRef } from '@angular/core';
-import { DOCUMENT } from '@angular/common';
+import { NATIVE_FILE, NATIVE_STRING } from './utils/native-file';
 
 class RegistryStub {
   getSource(): any {}
@@ -121,6 +122,36 @@ describe('DragMonitor', () => {
     expect(monitor.canDrop('foo', 'bar')).toBeFalsy();
     expect(getSourceSpy).toHaveBeenCalledTimes(1);
     expect(getSourceSpy).toHaveBeenCalledWith('bar');
+    expect(getTargetSpy).toHaveBeenCalledTimes(1);
+    expect(getTargetSpy).toHaveBeenCalledWith('foo');
+  });
+
+  it('should return true for canDrop when source is native file or string and target supports it', () => {
+    const getTargetSpy = spyOn(registry, 'getTarget').and.returnValue({
+      itemType: [NATIVE_FILE, 'test3'],
+      canDrop: true
+    });
+    expect(monitor.canDrop('foo', NATIVE_FILE)).toBeTruthy();
+    expect(getTargetSpy).toHaveBeenCalledTimes(1);
+    expect(getTargetSpy).toHaveBeenCalledWith('foo');
+  });
+
+  it('should return true for canDrop when source is native file or string and target supports it but canDrop is false', () => {
+    const getTargetSpy = spyOn(registry, 'getTarget').and.returnValue({
+      itemType: NATIVE_STRING,
+      canDrop: false
+    });
+    expect(monitor.canDrop('foo', NATIVE_STRING)).toBeFalsy();
+    expect(getTargetSpy).toHaveBeenCalledTimes(1);
+    expect(getTargetSpy).toHaveBeenCalledWith('foo');
+  });
+
+  it('should return false for canDrop when source is native file or string and target does not support it', () => {
+    const getTargetSpy = spyOn(registry, 'getTarget').and.returnValue({
+      itemType: ['test', 'test3'],
+      canDrop: false
+    });
+    expect(monitor.canDrop('foo', NATIVE_FILE)).toBeFalsy();
     expect(getTargetSpy).toHaveBeenCalledTimes(1);
     expect(getTargetSpy).toHaveBeenCalledWith('foo');
   });

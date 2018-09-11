@@ -15,6 +15,8 @@ import { DragDispatcher2 } from '../drag-dispatcher.service';
 import { DragBackendEvent } from '../backends/drag-backend-event';
 import { DragBackendEventType } from '../backends/drag-backend-event-type';
 
+type canDropFn = (itemOrNative: string | any) => boolean;
+
 @Directive({
   selector: '[ccDropTarget]',
   exportAs: 'ccDropTarget'
@@ -25,7 +27,7 @@ export class DropTarget implements AfterViewInit, OnChanges, OnDestroy {
   isOver = false;
 
   @Input() itemType!: string | string[];
-  @Input() canDrop: any = true;
+  @Input() canDrop: boolean | canDropFn = true;
   @Input() dropEffect: 'copy' | 'move' | 'link' | 'none' = 'copy';
   @Output() hovered = new EventEmitter<any>();
   @Output() dropped = new EventEmitter<any>();

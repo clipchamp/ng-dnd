@@ -15,7 +15,13 @@ export class DragMonitor {
   canDrop(targetId: string, sourceId: string): boolean {
     const target = this.registry.getTarget(targetId);
     if (sourceId === NATIVE_FILE || sourceId === NATIVE_STRING) {
-      return !!target && target.itemType.indexOf(sourceId) > -1;
+      return (
+        !!target &&
+        ((typeof target.itemType === 'object' && target.itemType.indexOf(sourceId) > -1) ||
+          (typeof target.itemType === 'string' && target.itemType === sourceId)) &&
+        ((typeof target.canDrop === 'function' && target.canDrop(sourceId)) ||
+          (typeof target.canDrop !== 'function' && target.canDrop))
+      );
     }
     const source = this.registry.getSource(sourceId);
     return (
