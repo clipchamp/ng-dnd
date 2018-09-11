@@ -2,7 +2,7 @@ export const NATIVE_FILE = '__FILE__';
 export const NATIVE_STRING = '__STRING__';
 
 export function getNativeItemType(dataTransfer: DataTransfer): string {
-  if (dataTransfer.files.length > 0) {
+  if (dataTransfer.files && dataTransfer.files.length > 0) {
     return NATIVE_FILE;
   }
   if (dataTransfer.items) {
