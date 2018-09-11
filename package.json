@@ -11,7 +11,7 @@
     "start": "ng serve",
     "build": "ng build ng-dnd",
     "build:doc": "ng build",
-    "test": "ng test ng-dnd",
+    "test": "ng test ng-dnd --source-map=false",
     "test:ci": "ng test ng-dnd --watch=false --browsers=ChromeHeadless --code-coverage",
     "test:doc": "ng test",
     "lint": "ng lint ng-dnd",

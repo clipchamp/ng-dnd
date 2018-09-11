@@ -15,7 +15,7 @@ import { DragDispatcher2 } from '../drag-dispatcher.service';
 import { DragBackendEvent } from '../backends/drag-backend-event';
 import { DragBackendEventType } from '../backends/drag-backend-event-type';
 
-type canDropFn = (itemOrNative: string | any) => boolean;
+export type canDropFn = (itemOrNative: string | any) => boolean;
 
 @Directive({
   selector: '[ccDropTarget]',
