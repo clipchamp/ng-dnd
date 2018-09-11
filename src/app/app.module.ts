@@ -11,7 +11,7 @@ import {
   MatCardModule
 } from '@angular/material';
 
-import { DragModule, HTML5_DRAG_BACKEND_PROVIDER } from 'dist/ng-dnd';
+import { DragModule, HTML5_DRAG_BACKEND_PROVIDER } from 'projects/ng-dnd/src/public_api';
 import { AppComponent } from './app.component';
 import { ExampleModule } from './example/example.module';
 

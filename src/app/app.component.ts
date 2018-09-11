@@ -8,7 +8,7 @@ import {
 import { MatIconRegistry } from '@angular/material';
 import { DomSanitizer } from '@angular/platform-browser';
 import { registerIcons } from './icons';
-import { DragSource, DragDispatcher2 } from 'dist/ng-dnd';
+import { DragSource, DragDispatcher2 } from 'projects/ng-dnd/src/public_api';
 
 function splice<T extends { id: string }>(index: number, array: T[], newItem: T): T[] {
   return [
