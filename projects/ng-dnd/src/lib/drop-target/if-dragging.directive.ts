@@ -4,7 +4,9 @@ import {
   OnDestroy,
   TemplateRef,
   ViewContainerRef,
-  Input
+  Input,
+  Host,
+  Optional
 } from '@angular/core';
 import { Subscription, combineLatest } from 'rxjs';
 import { startWith } from 'rxjs/operators';
@@ -25,9 +27,11 @@ export class IfDragging implements AfterViewInit, OnDestroy {
   private hasView = false;
 
   constructor(
-    private readonly parent: DropTarget,
     private readonly templateRef: TemplateRef<any>,
-    private readonly viewContainerRef: ViewContainerRef
+    private readonly viewContainerRef: ViewContainerRef,
+    @Host()
+    @Optional()
+    private readonly parent: DropTarget
   ) {}
 
   ngAfterViewInit(): void {

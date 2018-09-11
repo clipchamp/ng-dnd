@@ -17,7 +17,8 @@ class MockDispatcher {
 
 @Component({
   template: `<div ccDropTarget [itemType]="'test'"><ng-template ccIfDragging [hideWhenOver]="true"><div class="test"></div></ng-template></div>
-  	<div ccDropTarget [itemType]="'test2'"><div class="test2" *ccIfDragging></div>`
+    <div ccDropTarget [itemType]="'test2'"><div class="test2" *ccIfDragging></div></div>
+    <div class="test3" *ccIfDragging></div>`
 })
 class TestComponent {}
 
@@ -171,5 +172,16 @@ describe('IfDragging', () => {
     fixture.detectChanges();
     const debugElement2 = fixture.debugElement.query(By.css('.test2'));
     expect(debugElement2).toBeTruthy();
+  });
+
+  it('should not create when not used in a drop target', () => {
+    expect(fixture.debugElement.query(By.css('.test3'))).toBeFalsy();
+    eventStream.next({
+      type: DragBackendEventType.DRAG_START,
+      clientOffset: { x: 0, y: 0 },
+      itemType: 'test3'
+    });
+    fixture.detectChanges();
+    expect(fixture.debugElement.query(By.css('.test3'))).toBeFalsy();
   });
 });

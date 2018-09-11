@@ -1,4 +1,12 @@
-import { Directive, TemplateRef, ViewContainerRef, OnDestroy, AfterViewInit } from '@angular/core';
+import {
+  Directive,
+  TemplateRef,
+  ViewContainerRef,
+  OnDestroy,
+  AfterViewInit,
+  Host,
+  Optional
+} from '@angular/core';
 import { DropTarget } from './drop-target.directive';
 import { Subscription } from 'rxjs';
 
@@ -10,9 +18,11 @@ export class IfOver implements AfterViewInit, OnDestroy {
   private hasView = false;
 
   constructor(
-    private readonly parent: DropTarget,
     private readonly templateRef: TemplateRef<any>,
-    private readonly viewContainerRef: ViewContainerRef
+    private readonly viewContainerRef: ViewContainerRef,
+    @Host()
+    @Optional()
+    private readonly parent: DropTarget
   ) {}
 
   ngAfterViewInit(): void {
