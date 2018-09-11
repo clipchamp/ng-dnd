@@ -16,11 +16,11 @@ import { coerceBoolean } from '../utils/coercion';
 })
 export class IfDragging implements AfterViewInit, OnDestroy {
   @Input()
-  set ccIfDragging(value: boolean) {
-    this.showWhenOver = coerceBoolean(value);
+  set hideWhenOver(value: any) {
+    this._hideWhenOver = coerceBoolean(value);
   }
 
-  private showWhenOver = true;
+  private _hideWhenOver = false;
   private subscription = Subscription.EMPTY;
   private hasView = false;
 
@@ -39,9 +39,9 @@ export class IfDragging implements AfterViewInit, OnDestroy {
       this.parent.dragging,
       this.parent.hovered.pipe(startWith(undefined))
     ).subscribe(([isDragging, isOver]) => {
-      if (isDragging && (this.showWhenOver || (!isOver && !this.showWhenOver)) && !this.hasView) {
+      if (isDragging && (!this._hideWhenOver || (!isOver && this._hideWhenOver)) && !this.hasView) {
         this.show();
-      } else if ((!isDragging || (!!isOver && !this.showWhenOver)) && this.hasView) {
+      } else if ((!isDragging || (!!isOver && this._hideWhenOver)) && this.hasView) {
         this.hide();
       }
     });

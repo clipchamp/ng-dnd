@@ -16,7 +16,7 @@ class MockDispatcher {
 }
 
 @Component({
-  template: `<div ccDropTarget [itemType]="'test'"><div class="test" *ccIfDragging="false"></div></div>
+  template: `<div ccDropTarget [itemType]="'test'"><ng-template ccIfDragging [hideWhenOver]="true"><div class="test"></div></ng-template></div>
   	<div ccDropTarget [itemType]="'test2'"><div class="test2" *ccIfDragging></div>`
 })
 class TestComponent {}

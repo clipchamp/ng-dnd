@@ -5,7 +5,10 @@ export function coerceBoolean(value: any): boolean {
   if (typeof value === 'string') {
     return value !== 'false';
   }
-  return true;
+  if (typeof value === 'number') {
+    return value !== 0;
+  }
+  return value !== null && value !== undefined;
 }
 
 export function coerceArray<T>(value: T | T[]): T[] {
