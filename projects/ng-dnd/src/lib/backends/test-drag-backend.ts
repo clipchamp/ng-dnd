@@ -4,7 +4,7 @@ import { DragBackend } from './drag-backend';
 import { Unsubscribe } from './unsubscribe';
 import { DragBackendEvent } from './drag-backend-event';
 import { DragBackendEventType } from './drag-backend-event-type';
-import { Coordinates } from './offset';
+import { Coordinates } from '../utils/offset';
 
 @Injectable({ providedIn: 'root' })
 export class TestDragBackend extends DragBackend implements OnDestroy {

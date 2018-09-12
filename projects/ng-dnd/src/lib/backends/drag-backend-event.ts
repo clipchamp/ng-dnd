@@ -1,7 +1,7 @@
 import { DragBackendEventType } from './drag-backend-event-type';
-import { Coordinates } from './offset';
 import { DragSource } from '../drag-source';
 import { DropTarget } from '../drop-target';
+import { Coordinates } from '../utils/offset';
 
 export interface DragBackendEvent<T = any> {
   type: DragBackendEventType;

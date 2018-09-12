@@ -2,9 +2,9 @@ import { NgZone, Provider, Injectable, OnDestroy } from '@angular/core';
 import { DragBackend } from './drag-backend';
 import { DragBackendEvent } from './drag-backend-event';
 import { DragBackendEventType } from './drag-backend-event-type';
-import { getEventClientOffset, getDragPreviewOffset, getSourceOffset } from './offset';
 import { Unsubscribe } from './unsubscribe';
 import { DragMonitor } from '../drag-monitor';
+import { getEventClientOffset, getDragPreviewOffset, getSourceOffset } from '../utils/offset';
 import {
   NATIVE_FILE,
   getNativeFiles,
