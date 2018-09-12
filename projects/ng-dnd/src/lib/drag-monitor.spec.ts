@@ -40,162 +40,166 @@ describe('DragMonitor', () => {
     expect(monitor).toBeTruthy();
   });
 
-  it('should return true for canDrag when the source is found and has a canDrag attribute set to true', () => {
-    const getSourceSpy = spyOn(registry, 'getSource').and.returnValue({ canDrag: true });
-    expect(monitor.canDrag('foo')).toBeTruthy();
-    expect(getSourceSpy).toHaveBeenCalledTimes(1);
-    expect(getSourceSpy).toHaveBeenCalledWith('foo');
+  describe('canDrag', () => {
+    it('should return true when the source is found and has a canDrag attribute set to true', () => {
+      const getSourceSpy = spyOn(registry, 'getSource').and.returnValue({ canDrag: true });
+      expect(monitor.canDrag('foo')).toBeTruthy();
+      expect(getSourceSpy).toHaveBeenCalledTimes(1);
+      expect(getSourceSpy).toHaveBeenCalledWith('foo');
+    });
+
+    it('should return false when the source is not found', () => {
+      const getSourceSpy = spyOn(registry, 'getSource').and.returnValue(undefined);
+      expect(monitor.canDrag('foo')).toBeFalsy();
+      expect(getSourceSpy).toHaveBeenCalledTimes(1);
+      expect(getSourceSpy).toHaveBeenCalledWith('foo');
+    });
+
+    it('should return false when the source is found and has a canDrag attribute set to false', () => {
+      const getSourceSpy = spyOn(registry, 'getSource').and.returnValue({ canDrag: false });
+      expect(monitor.canDrag('foo')).toBeFalsy();
+      expect(getSourceSpy).toHaveBeenCalledTimes(1);
+      expect(getSourceSpy).toHaveBeenCalledWith('foo');
+    });
   });
 
-  it('should return false for canDrag when the source is not found', () => {
-    const getSourceSpy = spyOn(registry, 'getSource').and.returnValue(undefined);
-    expect(monitor.canDrag('foo')).toBeFalsy();
-    expect(getSourceSpy).toHaveBeenCalledTimes(1);
-    expect(getSourceSpy).toHaveBeenCalledWith('foo');
-  });
+  describe('canDrop', () => {
+    it('should return true when source and target are found and their item types match', () => {
+      const getSourceSpy = spyOn(registry, 'getSource').and.returnValue({ itemType: 'test' });
+      const getTargetSpy = spyOn(registry, 'getTarget').and.returnValue({
+        itemType: 'test',
+        canDrop: true
+      });
+      expect(monitor.canDrop('foo', 'bar')).toBeTruthy();
+      expect(getSourceSpy).toHaveBeenCalledTimes(1);
+      expect(getSourceSpy).toHaveBeenCalledWith('bar');
+      expect(getTargetSpy).toHaveBeenCalledTimes(1);
+      expect(getTargetSpy).toHaveBeenCalledWith('foo');
+    });
 
-  it('should return false for canDrag when the source is found and has a canDrag attribute set to false', () => {
-    const getSourceSpy = spyOn(registry, 'getSource').and.returnValue({ canDrag: false });
-    expect(monitor.canDrag('foo')).toBeFalsy();
-    expect(getSourceSpy).toHaveBeenCalledTimes(1);
-    expect(getSourceSpy).toHaveBeenCalledWith('foo');
-  });
+    it('should return false when source and target are found and their item types match but target has canDrop set to false', () => {
+      const getSourceSpy = spyOn(registry, 'getSource').and.returnValue({ itemType: 'test' });
+      const getTargetSpy = spyOn(registry, 'getTarget').and.returnValue({
+        itemType: 'test',
+        canDrop: false
+      });
+      expect(monitor.canDrop('foo', 'bar')).toBeFalsy();
+      expect(getSourceSpy).toHaveBeenCalledTimes(1);
+      expect(getSourceSpy).toHaveBeenCalledWith('bar');
+      expect(getTargetSpy).toHaveBeenCalledTimes(1);
+      expect(getTargetSpy).toHaveBeenCalledWith('foo');
+    });
 
-  it('should return true for canDrop when source and target are found and their item types match', () => {
-    const getSourceSpy = spyOn(registry, 'getSource').and.returnValue({ itemType: 'test' });
-    const getTargetSpy = spyOn(registry, 'getTarget').and.returnValue({
-      itemType: 'test',
-      canDrop: true
+    it('should return false when source and target are found and their item types do not match', () => {
+      const getSourceSpy = spyOn(registry, 'getSource').and.returnValue({ itemType: 'test' });
+      const getTargetSpy = spyOn(registry, 'getTarget').and.returnValue({
+        itemType: 'test2',
+        canDrop: true
+      });
+      expect(monitor.canDrop('foo', 'bar')).toBeFalsy();
+      expect(getSourceSpy).toHaveBeenCalledTimes(1);
+      expect(getSourceSpy).toHaveBeenCalledWith('bar');
+      expect(getTargetSpy).toHaveBeenCalledTimes(1);
+      expect(getTargetSpy).toHaveBeenCalledWith('foo');
     });
-    expect(monitor.canDrop('foo', 'bar')).toBeTruthy();
-    expect(getSourceSpy).toHaveBeenCalledTimes(1);
-    expect(getSourceSpy).toHaveBeenCalledWith('bar');
-    expect(getTargetSpy).toHaveBeenCalledTimes(1);
-    expect(getTargetSpy).toHaveBeenCalledWith('foo');
-  });
 
-  it('should return false for canDrop when source and target are found and their item types match but target has canDrop set to false', () => {
-    const getSourceSpy = spyOn(registry, 'getSource').and.returnValue({ itemType: 'test' });
-    const getTargetSpy = spyOn(registry, 'getTarget').and.returnValue({
-      itemType: 'test',
-      canDrop: false
+    it('should return true when source and target are found and their item types match (target has an array of item types)', () => {
+      const getSourceSpy = spyOn(registry, 'getSource').and.returnValue({ itemType: 'test' });
+      const getTargetSpy = spyOn(registry, 'getTarget').and.returnValue({
+        itemType: ['test2', 'test'],
+        canDrop: true
+      });
+      expect(monitor.canDrop('foo', 'bar')).toBeTruthy();
+      expect(getSourceSpy).toHaveBeenCalledTimes(1);
+      expect(getSourceSpy).toHaveBeenCalledWith('bar');
+      expect(getTargetSpy).toHaveBeenCalledTimes(1);
+      expect(getTargetSpy).toHaveBeenCalledWith('foo');
     });
-    expect(monitor.canDrop('foo', 'bar')).toBeFalsy();
-    expect(getSourceSpy).toHaveBeenCalledTimes(1);
-    expect(getSourceSpy).toHaveBeenCalledWith('bar');
-    expect(getTargetSpy).toHaveBeenCalledTimes(1);
-    expect(getTargetSpy).toHaveBeenCalledWith('foo');
-  });
 
-  it('should return false for canDrop when source and target are found and their item types do not match', () => {
-    const getSourceSpy = spyOn(registry, 'getSource').and.returnValue({ itemType: 'test' });
-    const getTargetSpy = spyOn(registry, 'getTarget').and.returnValue({
-      itemType: 'test2',
-      canDrop: true
+    it('should return false when source and target are found and their item types do not match (target has an array of item types)', () => {
+      const getSourceSpy = spyOn(registry, 'getSource').and.returnValue({ itemType: 'test' });
+      const getTargetSpy = spyOn(registry, 'getTarget').and.returnValue({
+        itemType: ['test2', 'test3'],
+        canDrop: true
+      });
+      expect(monitor.canDrop('foo', 'bar')).toBeFalsy();
+      expect(getSourceSpy).toHaveBeenCalledTimes(1);
+      expect(getSourceSpy).toHaveBeenCalledWith('bar');
+      expect(getTargetSpy).toHaveBeenCalledTimes(1);
+      expect(getTargetSpy).toHaveBeenCalledWith('foo');
     });
-    expect(monitor.canDrop('foo', 'bar')).toBeFalsy();
-    expect(getSourceSpy).toHaveBeenCalledTimes(1);
-    expect(getSourceSpy).toHaveBeenCalledWith('bar');
-    expect(getTargetSpy).toHaveBeenCalledTimes(1);
-    expect(getTargetSpy).toHaveBeenCalledWith('foo');
-  });
 
-  it('should return true for canDrop when source and target are found and their item types match (target has an array of item types)', () => {
-    const getSourceSpy = spyOn(registry, 'getSource').and.returnValue({ itemType: 'test' });
-    const getTargetSpy = spyOn(registry, 'getTarget').and.returnValue({
-      itemType: ['test2', 'test'],
-      canDrop: true
+    it('should return true when source is native file or string and target supports it', () => {
+      const getTargetSpy = spyOn(registry, 'getTarget').and.returnValue({
+        itemType: [NATIVE_FILE, 'test3'],
+        canDrop: true
+      });
+      expect(monitor.canDrop('foo', NATIVE_FILE)).toBeTruthy();
+      expect(getTargetSpy).toHaveBeenCalledTimes(1);
+      expect(getTargetSpy).toHaveBeenCalledWith('foo');
     });
-    expect(monitor.canDrop('foo', 'bar')).toBeTruthy();
-    expect(getSourceSpy).toHaveBeenCalledTimes(1);
-    expect(getSourceSpy).toHaveBeenCalledWith('bar');
-    expect(getTargetSpy).toHaveBeenCalledTimes(1);
-    expect(getTargetSpy).toHaveBeenCalledWith('foo');
-  });
 
-  it('should return false for canDrop when source and target are found and their item types do not match (target has an array of item types)', () => {
-    const getSourceSpy = spyOn(registry, 'getSource').and.returnValue({ itemType: 'test' });
-    const getTargetSpy = spyOn(registry, 'getTarget').and.returnValue({
-      itemType: ['test2', 'test3'],
-      canDrop: true
+    it('should return true when source is native file or string and target supports it but canDrop is false', () => {
+      const getTargetSpy = spyOn(registry, 'getTarget').and.returnValue({
+        itemType: NATIVE_STRING,
+        canDrop: false
+      });
+      expect(monitor.canDrop('foo', NATIVE_STRING)).toBeFalsy();
+      expect(getTargetSpy).toHaveBeenCalledTimes(1);
+      expect(getTargetSpy).toHaveBeenCalledWith('foo');
     });
-    expect(monitor.canDrop('foo', 'bar')).toBeFalsy();
-    expect(getSourceSpy).toHaveBeenCalledTimes(1);
-    expect(getSourceSpy).toHaveBeenCalledWith('bar');
-    expect(getTargetSpy).toHaveBeenCalledTimes(1);
-    expect(getTargetSpy).toHaveBeenCalledWith('foo');
-  });
 
-  it('should return true for canDrop when source is native file or string and target supports it', () => {
-    const getTargetSpy = spyOn(registry, 'getTarget').and.returnValue({
-      itemType: [NATIVE_FILE, 'test3'],
-      canDrop: true
+    it('should return false when source is native file or string and target does not support it', () => {
+      const getTargetSpy = spyOn(registry, 'getTarget').and.returnValue({
+        itemType: ['test', 'test3'],
+        canDrop: false
+      });
+      expect(monitor.canDrop('foo', NATIVE_FILE)).toBeFalsy();
+      expect(getTargetSpy).toHaveBeenCalledTimes(1);
+      expect(getTargetSpy).toHaveBeenCalledWith('foo');
     });
-    expect(monitor.canDrop('foo', NATIVE_FILE)).toBeTruthy();
-    expect(getTargetSpy).toHaveBeenCalledTimes(1);
-    expect(getTargetSpy).toHaveBeenCalledWith('foo');
-  });
 
-  it('should return true for canDrop when source is native file or string and target supports it but canDrop is false', () => {
-    const getTargetSpy = spyOn(registry, 'getTarget').and.returnValue({
-      itemType: NATIVE_STRING,
-      canDrop: false
+    it('should return true when source and target are found and their item types match and target has canDrop function that returns true', () => {
+      const getSourceSpy = spyOn(registry, 'getSource').and.returnValue({
+        itemType: 'test',
+        item: { id: 'bar' }
+      });
+      const canDropSpy = jasmine
+        .createSpy('canDrop', (item: any) => item.id === 'bar')
+        .and.callThrough();
+      const getTargetSpy = spyOn(registry, 'getTarget').and.returnValue({
+        itemType: 'test',
+        canDrop: canDropSpy
+      });
+      expect(monitor.canDrop('foo', 'bar')).toBeTruthy();
+      expect(getSourceSpy).toHaveBeenCalledTimes(1);
+      expect(getSourceSpy).toHaveBeenCalledWith('bar');
+      expect(getTargetSpy).toHaveBeenCalledTimes(1);
+      expect(getTargetSpy).toHaveBeenCalledWith('foo');
+      expect(canDropSpy).toHaveBeenCalledTimes(1);
+      expect(canDropSpy).toHaveBeenCalledWith({ id: 'bar' });
     });
-    expect(monitor.canDrop('foo', NATIVE_STRING)).toBeFalsy();
-    expect(getTargetSpy).toHaveBeenCalledTimes(1);
-    expect(getTargetSpy).toHaveBeenCalledWith('foo');
-  });
 
-  it('should return false for canDrop when source is native file or string and target does not support it', () => {
-    const getTargetSpy = spyOn(registry, 'getTarget').and.returnValue({
-      itemType: ['test', 'test3'],
-      canDrop: false
+    it('should return false when source and target are found and their item types match and target has canDrop function that returns false', () => {
+      const getSourceSpy = spyOn(registry, 'getSource').and.returnValue({
+        itemType: 'test',
+        item: { id: 'bar' }
+      });
+      const canDropSpy = jasmine
+        .createSpy('canDrop', (item: any) => item.id === 'foo')
+        .and.callThrough();
+      const getTargetSpy = spyOn(registry, 'getTarget').and.returnValue({
+        itemType: 'test',
+        canDrop: canDropSpy
+      });
+      expect(monitor.canDrop('foo', 'bar')).toBeFalsy(29);
+      expect(getSourceSpy).toHaveBeenCalledTimes(1);
+      expect(getSourceSpy).toHaveBeenCalledWith('bar');
+      expect(getTargetSpy).toHaveBeenCalledTimes(1);
+      expect(getTargetSpy).toHaveBeenCalledWith('foo');
+      expect(canDropSpy).toHaveBeenCalledTimes(1);
+      expect(canDropSpy).toHaveBeenCalledWith({ id: 'bar' });
     });
-    expect(monitor.canDrop('foo', NATIVE_FILE)).toBeFalsy();
-    expect(getTargetSpy).toHaveBeenCalledTimes(1);
-    expect(getTargetSpy).toHaveBeenCalledWith('foo');
-  });
-
-  it('should return true for canDrop when source and target are found and their item types match and target has canDrop function that returns true', () => {
-    const getSourceSpy = spyOn(registry, 'getSource').and.returnValue({
-      itemType: 'test',
-      item: { id: 'bar' }
-    });
-    const canDropSpy = jasmine
-      .createSpy('canDrop', (item: any) => item.id === 'bar')
-      .and.callThrough();
-    const getTargetSpy = spyOn(registry, 'getTarget').and.returnValue({
-      itemType: 'test',
-      canDrop: canDropSpy
-    });
-    expect(monitor.canDrop('foo', 'bar')).toBeTruthy();
-    expect(getSourceSpy).toHaveBeenCalledTimes(1);
-    expect(getSourceSpy).toHaveBeenCalledWith('bar');
-    expect(getTargetSpy).toHaveBeenCalledTimes(1);
-    expect(getTargetSpy).toHaveBeenCalledWith('foo');
-    expect(canDropSpy).toHaveBeenCalledTimes(1);
-    expect(canDropSpy).toHaveBeenCalledWith({ id: 'bar' });
-  });
-
-  it('should return false for canDrop when source and target are found and their item types match and target has canDrop function that returns false', () => {
-    const getSourceSpy = spyOn(registry, 'getSource').and.returnValue({
-      itemType: 'test',
-      item: { id: 'bar' }
-    });
-    const canDropSpy = jasmine
-      .createSpy('canDrop', (item: any) => item.id === 'foo')
-      .and.callThrough();
-    const getTargetSpy = spyOn(registry, 'getTarget').and.returnValue({
-      itemType: 'test',
-      canDrop: canDropSpy
-    });
-    expect(monitor.canDrop('foo', 'bar')).toBeFalsy(29);
-    expect(getSourceSpy).toHaveBeenCalledTimes(1);
-    expect(getSourceSpy).toHaveBeenCalledWith('bar');
-    expect(getTargetSpy).toHaveBeenCalledTimes(1);
-    expect(getTargetSpy).toHaveBeenCalledWith('foo');
-    expect(canDropSpy).toHaveBeenCalledTimes(1);
-    expect(canDropSpy).toHaveBeenCalledWith({ id: 'bar' });
   });
 
   it('should return an empty image when source has a TemplateRef as drag preview', () => {
