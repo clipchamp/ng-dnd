@@ -9,8 +9,8 @@ import { Observable } from 'rxjs';
             [class.drag-preview--show]="preview.show"
             [class.drag-preview--hidden]="!(dragPreviewsEnabled$ | async)"
             [style.transform]="transform(preview.context)"
-            [style.width.px]="preview.context.width"
-            [style.height.px]="preview.context.height"
+            [style.width.px]="preview.context.sourceOffset.width"
+            [style.height.px]="preview.context.sourceOffset.height"
             *ngFor="let preview of previewAsArray">
           <ng-container *ngTemplateOutlet="preview?.template; context: preview?.context"></ng-container>
         </div>`,
@@ -24,6 +24,7 @@ import { Observable } from 'rxjs';
         pointer-events: none;
         opacity: 0;
         transition: opacity 60ms ease-in-out;
+        will-change: transform;
       }
 
       .drag-preview--show {
@@ -71,7 +72,7 @@ export class DragLayer implements AfterViewInit {
   }
 
   updatePreview(id: string, context: any): void {
-    if (!this.previews[id].context.position) {
+    if (!this.previews[id].context.clientOffset) {
       return;
     }
     this.previews[id].context = context;
@@ -84,10 +85,11 @@ export class DragLayer implements AfterViewInit {
   }
 
   transform(context: any): string {
-    if (!context || !context.position) {
+    if (!context || !context.clientOffset) {
       return 'none';
     }
-    return `translate3d(${context.position.x}px, ${context.position.y}px, 0)`;
+    return `translate3d(${context.clientOffset.x - context.sourceOffset.x}px, ${context.clientOffset
+      .y - context.sourceOffset.y}px, 0)`;
   }
 
   get previewAsArray(): { id: string; template: any; context: any; show: boolean }[] {

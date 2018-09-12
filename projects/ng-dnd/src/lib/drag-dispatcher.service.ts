@@ -124,61 +124,50 @@ export class DragDispatcher2 {
     dragPreview: TemplateRef<any>
   ): void {
     let active = false;
-    let offset;
     eventStream$
       .pipe(filter(event => event.type === DragBackendEventType.DRAG_START && !!this.dragLayer))
-      .subscribe(event => {
+      .subscribe(({ clientOffset, sourceOffset, targetId, item, sourceId }) => {
         active = true;
-        offset = event.sourceOffset;
         // tslint:disable-next-line:no-non-null-assertion
-        this.dragLayer!.showPreview(event.sourceId, dragPreview, {
-          position: {
-            x: event.clientOffset.x - offset.x,
-            y: event.clientOffset.y - offset.y
-          },
-          width: offset.width,
-          height: offset.height,
-          canDrop: !!event.targetId,
-          $implicit: event.item
+        this.dragLayer!.showPreview(sourceId, dragPreview, {
+          clientOffset,
+          sourceOffset,
+          canDrop: !!targetId,
+          $implicit: item
         });
       });
     eventStream$
       .pipe(
         filter(
-          event =>
+          ({ type, clientOffset }) =>
             active &&
-            event.type === DragBackendEventType.DRAG_OVER &&
+            type === DragBackendEventType.DRAG_OVER &&
             !!this.dragLayer &&
-            !(event.clientOffset.x === 0 && event.clientOffset.y === 0)
+            !(clientOffset.x === 0 && clientOffset.y === 0)
         )
       )
-      .subscribe(event => {
+      .subscribe(({ clientOffset, sourceOffset, targetId, item, sourceId }) => {
         // tslint:disable-next-line:no-non-null-assertion
-        this.dragLayer!.updatePreview(event.sourceId, {
-          position: {
-            x: event.clientOffset.x - offset.x,
-            y: event.clientOffset.y - offset.y
-          },
-          width: offset.width,
-          height: offset.height,
-          canDrop: !!event.targetId,
-          $implicit: event.item
+        this.dragLayer!.updatePreview(sourceId, {
+          clientOffset,
+          sourceOffset,
+          canDrop: !!targetId,
+          $implicit: item
         });
       });
     eventStream$
       .pipe(
         filter(
-          event =>
+          ({ type }) =>
             active &&
-            (event.type === DragBackendEventType.DRAG_END ||
-              event.type === DragBackendEventType.DROP) &&
+            (type === DragBackendEventType.DRAG_END || type === DragBackendEventType.DROP) &&
             !!this.dragLayer
         )
       )
-      .subscribe(event => {
+      .subscribe(({ sourceId }) => {
         active = false;
         // tslint:disable-next-line:no-non-null-assertion
-        this.dragLayer!.hidePreview(event.sourceId);
+        this.dragLayer!.hidePreview(sourceId);
       });
   }
 
