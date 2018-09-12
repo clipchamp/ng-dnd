@@ -3,10 +3,9 @@ import { DragSource } from './drag-source.directive';
 import { Component, DebugElement } from '@angular/core';
 import { By } from '@angular/platform-browser';
 import { DragDispatcher2 } from '../drag-dispatcher.service';
-import { Subject } from 'rxjs';
-import { DragBackendEvent } from '../backends/drag-backend-event';
 import { DragBackendEventType } from '../backends/drag-backend-event-type';
 import { take } from 'rxjs/operators';
+import { DISPATCHER_STUB_PROVIDERS, DispatcherStubController } from '../testing/dispatcher-stub';
 
 @Component({
   template: `<div ccDragSource [item]="{ foo: 'bar' }" itemType="baz" *ngIf="showSource"></div>`
@@ -15,34 +14,24 @@ export class TestHostComponent {
   showSource = true;
 }
 
-class MockDispatcher {
-  connectDragSource(): any {}
-  disconnectDragSource(): void {}
-}
-
 describe('DragSource', () => {
+  let controller: DispatcherStubController;
   let dispatcher: DragDispatcher2;
   let connectSpy: jasmine.Spy;
   let fixture: ComponentFixture<TestHostComponent>;
   let component: TestHostComponent;
   let sourceDebugElement: DebugElement;
   let source: DragSource;
-  let eventStream: Subject<DragBackendEvent>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [TestHostComponent, DragSource],
-      providers: [
-        {
-          provide: DragDispatcher2,
-          useClass: MockDispatcher
-        }
-      ]
+      providers: DISPATCHER_STUB_PROVIDERS
     });
 
-    eventStream = new Subject<DragBackendEvent>();
+    controller = TestBed.get(DispatcherStubController);
     dispatcher = TestBed.get(DragDispatcher2);
-    connectSpy = spyOn(dispatcher, 'connectDragSource').and.returnValue(eventStream.asObservable());
+    connectSpy = spyOn(dispatcher, 'connectDragSource').and.callThrough();
 
     fixture = TestBed.createComponent(TestHostComponent);
     component = fixture.componentInstance;
@@ -76,9 +65,9 @@ describe('DragSource', () => {
     fixture.detectChanges();
   });
 
-  describe('with dragging', () => {
+  describe('when dragging a source', () => {
     beforeEach(() => {
-      eventStream.next({
+      controller.publish({
         type: DragBackendEventType.DRAG_START,
         sourceId: 'test',
         clientOffset: {
@@ -94,7 +83,7 @@ describe('DragSource', () => {
     });
 
     it('should set isDragging to false on drag end', () => {
-      eventStream.next({
+      controller.publish({
         type: DragBackendEventType.DRAG_END,
         sourceId: 'test',
         clientOffset: {
@@ -107,7 +96,7 @@ describe('DragSource', () => {
     });
 
     it('should set isDragging to false on drop', () => {
-      eventStream.next({
+      controller.publish({
         type: DragBackendEventType.DROP,
         sourceId: 'test',
         clientOffset: {
@@ -124,7 +113,7 @@ describe('DragSource', () => {
         expect(payload).toEqual({ foo: 'bar' });
         done();
       });
-      eventStream.next({
+      controller.publish({
         type: DragBackendEventType.DROP,
         sourceId: 'test',
         clientOffset: {

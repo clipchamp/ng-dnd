@@ -2,7 +2,6 @@ import {
   Directive,
   AfterContentInit,
   Input,
-  OnChanges,
   Renderer2,
   ElementRef,
   ContentChild,
@@ -15,15 +14,23 @@ import { Subscription } from 'rxjs';
   selector: '[ccDragSourceDragging]',
   exportAs: 'ccDragSourceDragging'
 })
-export class DragSourceDragging implements AfterContentInit, OnChanges, OnDestroy {
+export class DragSourceDragging implements AfterContentInit, OnDestroy {
   isActive = false;
 
   @ContentChild(DragSource) source: DragSource;
 
   @Input()
   set ccDragSourceDragging(data: string[] | string) {
+    const isActive = this.isActive;
+    if (this.isActive && this.classList.length > 0) {
+      this.classList.map(c => {
+        this.renderer.removeClass(this.elementRef.nativeElement, c);
+      });
+      this.isActive = false;
+    }
     const classes = Array.isArray(data) ? data : data.split(' ');
     this.classList = classes.filter(c => !!c);
+    this.update(isActive);
   }
 
   private classList: string[] = [];
@@ -35,25 +42,19 @@ export class DragSourceDragging implements AfterContentInit, OnChanges, OnDestro
     if (!this.source) {
       return;
     }
-    this.subscription = this.source.dragging.subscribe(_ => this.update());
-    this.update();
-  }
-
-  ngOnChanges(): void {
-    this.update();
+    this.subscription = this.source.dragging.subscribe(isDragging => this.update(isDragging));
   }
 
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
   }
 
-  private update(): void {
+  private update(isDragging: boolean): void {
     if (!this.source) {
       return;
     }
 
     Promise.resolve().then(() => {
-      const isDragging = this.source.isDragging;
       if (this.isActive !== isDragging) {
         this.isActive = isDragging;
         this.classList.map(c => {

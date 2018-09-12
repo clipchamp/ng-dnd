@@ -119,7 +119,7 @@ describe('DropTargetDragging', () => {
       component.activeClass = 'foo';
       fixture.detectChanges();
       tick();
-      expect(draggingDebugElement.classes['is-over']).toBeFalsy();
+      expect(draggingDebugElement.classes['is-dragging']).toBeFalsy();
       expect(draggingDebugElement.classes['foo']).toBeTruthy();
     })
   );

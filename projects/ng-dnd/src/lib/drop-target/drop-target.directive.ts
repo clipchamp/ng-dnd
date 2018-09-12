@@ -39,7 +39,7 @@ export class DropTarget implements AfterViewInit, OnChanges, OnDestroy {
 
   eventStream$: Observable<DragBackendEvent> = this.eventStream.asObservable();
 
-  private get hostElement(): any {
+  get hostElement(): any {
     return this.elementRef.nativeElement;
   }
 
