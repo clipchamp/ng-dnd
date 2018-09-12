@@ -8,6 +8,23 @@ import { DragBackendEvent } from '../backends/drag-backend-event';
 import { DragBackendEventType } from '../backends/drag-backend-event-type';
 
 /**
+ * Utility service to emit drag events.
+ */
+@Injectable()
+export class DispatcherStubController {
+  readonly eventStream$: Observable<DragBackendEvent>;
+  private readonly eventStream = new Subject<DragBackendEvent>();
+
+  constructor() {
+    this.eventStream$ = this.eventStream.asObservable();
+  }
+
+  publish(event: DragBackendEvent): void {
+    this.eventStream.next(event);
+  }
+}
+
+/**
  * Simplified dispatcher for testing purposes.
  */
 @Injectable()
@@ -53,23 +70,6 @@ export class DispatcherStub {
       ),
       map(({ type }) => type === DragBackendEventType.DRAG_START)
     );
-  }
-}
-
-/**
- * Utility service to emit drag events.
- */
-@Injectable()
-export class DispatcherStubController {
-  readonly eventStream$: Observable<DragBackendEvent>;
-  private readonly eventStream = new Subject<DragBackendEvent>();
-
-  constructor() {
-    this.eventStream$ = this.eventStream.asObservable();
-  }
-
-  publish(event: DragBackendEvent): void {
-    this.eventStream.next(event);
   }
 }
 
