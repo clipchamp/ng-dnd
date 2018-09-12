@@ -3,16 +3,8 @@ import { TestBed, ComponentFixture } from '@angular/core/testing';
 import { DropTarget } from './drop-target.directive';
 import { DragDispatcher2 } from '../drag-dispatcher.service';
 import { By } from '@angular/platform-browser';
-import { of, Observable, Subject } from 'rxjs';
-import { DragBackendEvent } from '../backends/drag-backend-event';
-import { DragBackendEventType } from 'projects/ng-dnd/src/lib/backends/drag-backend-event-type';
-import { filter, map } from 'rxjs/operators';
-
-class MockDispatcher {
-  connectDropTarget(target: DropTarget, node: any): any {}
-  disconnectDropTarget(): any {}
-  dragging$(itemTypes: string[]): any {}
-}
+import { DragBackendEventType } from '../backends/drag-backend-event-type';
+import { DISPATCHER_STUB_PROVIDERS, DispatcherStubController } from '../testing/dispatcher-stub';
 
 @Component({
   template: `<div ccDropTarget [itemType]="itemTypes" (dragging)="onDrag($event)" (hovered)="onHover($event)" (dropped)="onDrop($event)"></div>`
@@ -26,10 +18,10 @@ class TestComponent {
 }
 
 describe('DropTarget', () => {
+  let controller: DispatcherStubController;
   let dispatcher: DragDispatcher2;
   let fixture: ComponentFixture<TestComponent>;
   let component: TestComponent;
-  let eventStream: Subject<DragBackendEvent>;
   let connectSpy: jasmine.Spy;
   let draggingSpy: jasmine.Spy;
   let targetDebugElement: DebugElement;
@@ -38,23 +30,13 @@ describe('DropTarget', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [TestComponent, DropTarget],
-      providers: [{ provide: DragDispatcher2, useClass: MockDispatcher }]
+      providers: DISPATCHER_STUB_PROVIDERS
     });
 
-    eventStream = new Subject();
+    controller = TestBed.get(DispatcherStubController);
     dispatcher = TestBed.get(DragDispatcher2);
-    connectSpy = spyOn(dispatcher, 'connectDropTarget').and.returnValue(eventStream.asObservable());
-    draggingSpy = spyOn(dispatcher, 'dragging$').and.returnValue(
-      eventStream.pipe(
-        filter(
-          ({ type }) =>
-            type === DragBackendEventType.DRAG_START ||
-            type === DragBackendEventType.DRAG_END ||
-            type === DragBackendEventType.DROP
-        ),
-        map(({ type }) => type === DragBackendEventType.DRAG_START)
-      )
-    );
+    connectSpy = spyOn(dispatcher, 'connectDropTarget').and.callThrough();
+    draggingSpy = spyOn(dispatcher, 'dragging$').and.callThrough();
 
     fixture = TestBed.createComponent(TestComponent);
     component = fixture.componentInstance;
@@ -75,7 +57,7 @@ describe('DropTarget', () => {
   });
 
   it('should deregister itself with the drag dispatcher after deletion', () => {
-    const spy = spyOn(dispatcher, 'disconnectDropTarget').and.stub();
+    const spy = spyOn(dispatcher, 'disconnectDropTarget').and.callThrough();
     fixture.destroy();
     expect(spy).toHaveBeenCalledTimes(1);
     expect(spy).toHaveBeenCalledWith(dropTarget);
@@ -100,18 +82,17 @@ describe('DropTarget', () => {
     expect(draggingSpy).toHaveBeenCalledWith('foo');
   });
 
-  describe('when dragging an item', () => {
+  describe('when dragging an item outside of the target', () => {
     let onDragSpy: jasmine.Spy;
     const dragStartEvent = {
       type: DragBackendEventType.DRAG_START,
       clientOffset: { x: 0, y: 0 },
-      sourceOffset: { x: 0, y: 0, width: 0, height: 0 },
-      item: 'Test'
+      itemType: 'test'
     };
 
     beforeEach(() => {
       onDragSpy = spyOn(component, 'onDrag').and.stub();
-      eventStream.next(dragStartEvent);
+      controller.publish(dragStartEvent);
     });
 
     it('should emit a drag event when a drag started', () => {
@@ -120,32 +101,31 @@ describe('DropTarget', () => {
     });
 
     it('should emit a drag event when a drag ended', () => {
-      eventStream.next({ ...dragStartEvent, type: DragBackendEventType.DRAG_END });
+      controller.publish({ ...dragStartEvent, type: DragBackendEventType.DRAG_END });
       expect(onDragSpy).toHaveBeenCalledTimes(2);
       expect(onDragSpy).toHaveBeenCalledWith(true);
       expect(onDragSpy).toHaveBeenCalledWith(false);
     });
 
     it('should emit a drag event when an item was dropped', () => {
-      eventStream.next({ ...dragStartEvent, type: DragBackendEventType.DROP });
+      controller.publish({ ...dragStartEvent, type: DragBackendEventType.DROP });
       expect(onDragSpy).toHaveBeenCalledTimes(2);
       expect(onDragSpy).toHaveBeenCalledWith(true);
       expect(onDragSpy).toHaveBeenCalledWith(false);
     });
   });
 
-  describe('when hovering an item over the target', () => {
+  describe('when dragging an item over the target', () => {
     let onHoverSpy: jasmine.Spy;
     const dragOverEvent = {
       type: DragBackendEventType.DRAG_OVER,
       clientOffset: { x: 0, y: 0 },
-      sourceOffset: { x: 0, y: 0, width: 0, height: 0 },
-      item: 'Test'
+      itemType: 'test'
     };
 
     beforeEach(() => {
       onHoverSpy = spyOn(component, 'onHover').and.stub();
-      eventStream.next(dragOverEvent);
+      controller.publish(dragOverEvent);
     });
 
     it('should emit a hover event and set the isOver flag to true', () => {
@@ -155,11 +135,10 @@ describe('DropTarget', () => {
     });
 
     it('should reset after drag out', () => {
-      eventStream.next({
+      controller.publish({
         type: DragBackendEventType.DRAG_OUT,
         clientOffset: { x: 0, y: 0 },
-        sourceOffset: { x: 0, y: 0, width: 0, height: 0 },
-        item: 'Test'
+        itemType: 'test'
       });
       expect(onHoverSpy).toHaveBeenCalledTimes(2);
       expect(onHoverSpy).toHaveBeenCalledWith(dragOverEvent);
@@ -173,13 +152,12 @@ describe('DropTarget', () => {
     const dropEvent = {
       type: DragBackendEventType.DROP,
       clientOffset: { x: 0, y: 0 },
-      sourceOffset: { x: 0, y: 0, width: 0, height: 0 },
-      item: 'Test'
+      itemType: 'test'
     };
 
     beforeEach(() => {
       onDropSpy = spyOn(component, 'onDrop').and.stub();
-      eventStream.next(dropEvent);
+      controller.publish(dropEvent);
     });
 
     it('should emit a drop event', () => {

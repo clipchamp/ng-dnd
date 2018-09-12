@@ -1,19 +1,10 @@
 import { Component, DebugElement } from '@angular/core';
 import { By } from '@angular/platform-browser';
 import { TestBed, ComponentFixture, tick, fakeAsync } from '@angular/core/testing';
-import { Subject, of } from 'rxjs';
 import { DropTarget } from './drop-target.directive';
 import { DropTargetDragging } from './drop-target-dragging.directive';
-import { DragDispatcher2 } from '../drag-dispatcher.service';
-import { DragBackendEvent } from '../backends/drag-backend-event';
 import { DragBackendEventType } from '../backends/drag-backend-event-type';
-import { filter, map } from 'rxjs/operators';
-
-class MockDispatcher {
-  connectDropTarget(target: DropTarget, node: any): any {}
-  disconnectDropTarget(): any {}
-  dragging$(itemTypes: string[]): any {}
-}
+import { DISPATCHER_STUB_PROVIDERS, DispatcherStubController } from '../testing/dispatcher-stub';
 
 @Component({
   template: `<div ccDropTarget [itemType]="'test'" [ccDropTargetDragging]="activeClass"></div>`
@@ -23,32 +14,18 @@ class TestComponent {
 }
 
 describe('DropTargetDragging', () => {
-  let dispatcher: DragDispatcher2;
+  let controller: DispatcherStubController;
   let fixture: ComponentFixture<TestComponent>;
   let component: TestComponent;
-  let eventStream: Subject<DragBackendEvent>;
   let draggingDebugElement: DebugElement;
   let dragging: DropTargetDragging;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [TestComponent, DropTarget, DropTargetDragging],
-      providers: [{ provide: DragDispatcher2, useClass: MockDispatcher }]
+      providers: DISPATCHER_STUB_PROVIDERS
     });
-    eventStream = new Subject();
-    dispatcher = TestBed.get(DragDispatcher2);
-    spyOn(dispatcher, 'connectDropTarget').and.returnValue(eventStream.asObservable());
-    spyOn(dispatcher, 'dragging$').and.returnValue(
-      eventStream.pipe(
-        filter(
-          ({ type }) =>
-            type === DragBackendEventType.DRAG_START ||
-            type === DragBackendEventType.DRAG_END ||
-            type === DragBackendEventType.DROP
-        ),
-        map(({ type }) => type === DragBackendEventType.DRAG_START)
-      )
-    );
+    controller = TestBed.get(DispatcherStubController);
     fixture = TestBed.createComponent(TestComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
@@ -67,11 +44,11 @@ describe('DropTargetDragging', () => {
   it(
     'should append the specified class when an item is dragged',
     fakeAsync(() => {
-      eventStream.next({
+      controller.publish({
         type: DragBackendEventType.DRAG_START,
         clientOffset: { x: 0, y: 0 },
         sourceOffset: { x: 0, y: 0, width: 0, height: 0 },
-        item: 'Test'
+        itemType: 'test'
       });
       fixture.detectChanges();
       tick();
@@ -82,20 +59,20 @@ describe('DropTargetDragging', () => {
   it(
     'should remove the specified class when the drag finished',
     fakeAsync(() => {
-      eventStream.next({
+      controller.publish({
         type: DragBackendEventType.DRAG_START,
         clientOffset: { x: 0, y: 0 },
         sourceOffset: { x: 0, y: 0, width: 0, height: 0 },
-        item: 'Test'
+        itemType: 'test'
       });
       fixture.detectChanges();
       tick();
       expect(draggingDebugElement.classes['is-dragging']).toBeTruthy();
-      eventStream.next({
+      controller.publish({
         type: DragBackendEventType.DRAG_END,
         clientOffset: { x: 0, y: 0 },
         sourceOffset: { x: 0, y: 0, width: 0, height: 0 },
-        item: 'Test'
+        itemType: 'test'
       });
       fixture.detectChanges();
       tick();
@@ -106,20 +83,20 @@ describe('DropTargetDragging', () => {
   it(
     'should remove the specified class when an item was dropped',
     fakeAsync(() => {
-      eventStream.next({
+      controller.publish({
         type: DragBackendEventType.DRAG_START,
         clientOffset: { x: 0, y: 0 },
         sourceOffset: { x: 0, y: 0, width: 0, height: 0 },
-        item: 'Test'
+        itemType: 'test'
       });
       fixture.detectChanges();
       tick();
       expect(draggingDebugElement.classes['is-dragging']).toBeTruthy();
-      eventStream.next({
+      controller.publish({
         type: DragBackendEventType.DROP,
         clientOffset: { x: 0, y: 0 },
         sourceOffset: { x: 0, y: 0, width: 0, height: 0 },
-        item: 'Test'
+        itemType: 'test'
       });
       fixture.detectChanges();
       tick();
@@ -130,11 +107,11 @@ describe('DropTargetDragging', () => {
   it(
     'should immediately change the specified class when active',
     fakeAsync(() => {
-      eventStream.next({
+      controller.publish({
         type: DragBackendEventType.DRAG_START,
         clientOffset: { x: 0, y: 0 },
         sourceOffset: { x: 0, y: 0, width: 0, height: 0 },
-        item: 'Test'
+        itemType: 'test'
       });
       fixture.detectChanges();
       tick();
