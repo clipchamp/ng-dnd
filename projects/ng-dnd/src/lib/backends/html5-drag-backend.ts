@@ -329,12 +329,14 @@ export class Html5DragBackend extends DragBackend implements OnDestroy {
   }
 }
 
+export function html5BackendFactory(ngZone: NgZone, monitor: DragMonitor) {
+  return ngZone.runOutsideAngular(() => {
+    return new Html5DragBackend(monitor);
+  });
+}
+
 export const HTML5_DRAG_BACKEND_PROVIDER: Provider = {
   provide: DragBackend,
-  useFactory: (ngZone: NgZone, monitor: DragMonitor) => {
-    return ngZone.runOutsideAngular(() => {
-      return new Html5DragBackend(monitor);
-    });
-  },
+  useFactory: html5BackendFactory,
   deps: [NgZone, DragMonitor]
 };
