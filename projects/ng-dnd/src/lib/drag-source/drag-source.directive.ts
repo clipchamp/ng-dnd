@@ -15,6 +15,7 @@ import { distinctUntilChanged, filter, take, takeUntil, map } from 'rxjs/operato
 import { DragDispatcher2 } from '../drag-dispatcher.service';
 import { DragBackendEventType } from '../backends/drag-backend-event-type';
 import { DropTarget } from '../drop-target/drop-target.directive';
+import { enterZone } from 'projects/ng-dnd/src/lib/utils/enter-zone';
 
 @Directive({
   selector: '[ccDragSource]',
@@ -60,6 +61,7 @@ export class DragSource<T = any> implements AfterViewInit, OnDestroy {
   private readonly eventStream = new Subject<any>();
 
   constructor(
+    private readonly ngZone: NgZone,
     private readonly elementRef: ElementRef,
     private readonly dragDispatcher: DragDispatcher2,
     @Optional() public readonly parent?: DropTarget
@@ -71,7 +73,8 @@ export class DragSource<T = any> implements AfterViewInit, OnDestroy {
     this.eventStream
       .pipe(
         filter(event => event.type === DragBackendEventType.DROP),
-        map(event => event.item)
+        map(event => event.item),
+        enterZone(this.ngZone)
       )
       .subscribe(this.dropped);
   }
@@ -94,7 +97,8 @@ export class DragSource<T = any> implements AfterViewInit, OnDestroy {
       ),
       take(1)
     );
-    endDrag$.subscribe(() => {
+    endDrag$.pipe(enterZone(this.ngZone)).subscribe(() => {
+      console.warn('Is in angular zone?', NgZone.isInAngularZone());
       this.isDragging = false;
       this.canDrop = false;
     });
@@ -106,9 +110,11 @@ export class DragSource<T = any> implements AfterViewInit, OnDestroy {
             eventA.clientOffset.x === eventB.clientOffset.x &&
             eventA.clientOffset.y === eventB.clientOffset.y
         ),
-        takeUntil(endDrag$)
+        takeUntil(endDrag$),
+        enterZone(this.ngZone)
       )
       .subscribe(event => {
+        console.warn('Is in angular zone?', NgZone.isInAngularZone());
         this.canDrop = !!event.targetId;
       });
   }

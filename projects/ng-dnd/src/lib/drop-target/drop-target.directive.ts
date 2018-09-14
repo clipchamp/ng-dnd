@@ -7,13 +7,15 @@ import {
   Output,
   Input,
   OnChanges,
-  SimpleChanges
+  SimpleChanges,
+  NgZone
 } from '@angular/core';
-import { Subject, Subscription, Observable } from 'rxjs';
+import { Subject, Subscription } from 'rxjs';
 import { distinctUntilChanged, filter, takeUntil } from 'rxjs/operators';
 import { DragDispatcher2 } from '../drag-dispatcher.service';
 import { DragBackendEvent } from '../backends/drag-backend-event';
 import { DragBackendEventType } from '../backends/drag-backend-event-type';
+import { enterZone } from 'projects/ng-dnd/src/lib/utils/enter-zone';
 
 export type canDropFn = (itemOrNative: string | any) => boolean;
 
@@ -37,13 +39,12 @@ export class DropTarget implements AfterViewInit, OnChanges, OnDestroy {
   private readonly destroyed = new Subject<void>();
   private readonly eventStream = new Subject<DragBackendEvent>();
 
-  eventStream$: Observable<DragBackendEvent> = this.eventStream.asObservable();
-
   get hostElement(): any {
     return this.elementRef.nativeElement;
   }
 
   constructor(
+    private readonly ngZone: NgZone,
     private readonly elementRef: ElementRef,
     private readonly dragDispatcher: DragDispatcher2
   ) {
@@ -55,7 +56,8 @@ export class DropTarget implements AfterViewInit, OnChanges, OnDestroy {
             eventA.clientOffset.x === eventB.clientOffset.x &&
             eventA.clientOffset.y === eventB.clientOffset.y
         ),
-        takeUntil(this.destroyed)
+        takeUntil(this.destroyed),
+        enterZone(this.ngZone)
       )
       .subscribe(ev => {
         this.isOver = true;
@@ -72,7 +74,8 @@ export class DropTarget implements AfterViewInit, OnChanges, OnDestroy {
             eventA.clientOffset.x === eventB.clientOffset.x &&
             eventA.clientOffset.y === eventB.clientOffset.y
         ),
-        takeUntil(this.destroyed)
+        takeUntil(this.destroyed),
+        enterZone(this.ngZone)
       )
       .subscribe(() => {
         this.isOver = false;
@@ -81,7 +84,8 @@ export class DropTarget implements AfterViewInit, OnChanges, OnDestroy {
     this.eventStream
       .pipe(
         filter(event => event.type === DragBackendEventType.DROP),
-        takeUntil(this.destroyed)
+        takeUntil(this.destroyed),
+        enterZone(this.ngZone)
       )
       .subscribe(this.dropped);
   }
@@ -96,7 +100,10 @@ export class DropTarget implements AfterViewInit, OnChanges, OnDestroy {
   ngOnChanges(changes: SimpleChanges): void {
     if (changes.itemType) {
       this.subscription.unsubscribe();
-      this.subscription = this.dragDispatcher.dragging$(this.itemType).subscribe(this.dragging);
+      this.subscription = this.dragDispatcher
+        .dragging$(this.itemType)
+        .pipe(enterZone(this.ngZone))
+        .subscribe(this.dragging);
     }
   }
 

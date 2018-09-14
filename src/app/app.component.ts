@@ -1,14 +1,8 @@
-import {
-  Component,
-  ViewChildren,
-  QueryList,
-  ChangeDetectionStrategy,
-  ChangeDetectorRef
-} from '@angular/core';
+import { Component, ViewChildren, QueryList, ChangeDetectionStrategy, NgZone } from '@angular/core';
 import { MatIconRegistry } from '@angular/material';
 import { DomSanitizer } from '@angular/platform-browser';
 import { registerIcons } from './icons';
-import { DragSource, DragDispatcher2 } from 'projects/ng-dnd/src/public_api';
+import { DragSource } from 'projects/ng-dnd/src/public_api';
 
 function splice<T extends { id: string }>(index: number, array: T[], newItem: T): T[] {
   return [
@@ -50,12 +44,7 @@ export class AppComponent {
 
   @ViewChildren(DragSource) sources: QueryList<DragSource>;
 
-  constructor(
-    iconRegistry: MatIconRegistry,
-    sanitizer: DomSanitizer,
-    private cdRef: ChangeDetectorRef,
-    private dragDispatcher: DragDispatcher2
-  ) {
+  constructor(iconRegistry: MatIconRegistry, sanitizer: DomSanitizer) {
     registerIcons(iconRegistry, sanitizer);
     this.originalTargetData = [
       {
@@ -71,14 +60,6 @@ export class AppComponent {
         children: []
       }
     ];
-  }
-
-  onDrag(isDragging: boolean): void {
-    if (isDragging) {
-      this.cdRef.detach();
-    } else {
-      this.cdRef.reattach();
-    }
   }
 
   onHover(event: any, target?: any): void {
@@ -109,14 +90,13 @@ export class AppComponent {
         ...target,
         children: splice(index, target.children, item)
       });
-      this.cdRef.detectChanges();
     } else if (this._targetData !== this.targetData) {
       this.targetData = this._targetData;
-      this.cdRef.detectChanges();
     }
   }
 
   onDrop(event: any, target?: any): void {
+    console.warn('Is in angular zone?', NgZone.isInAngularZone());
     if (!!event.item.children && !target) {
       let index2 = this.findByPosition(event.clientOffset, event.target, true);
       if (index2 < 0) {
@@ -148,7 +128,6 @@ export class AppComponent {
         children: splice(index, target.children, item)
       }
     );
-    this.cdRef.detectChanges();
 
     this.calculateBounds();
   }

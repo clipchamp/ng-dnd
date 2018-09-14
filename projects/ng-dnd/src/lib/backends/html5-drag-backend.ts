@@ -14,7 +14,13 @@ import {
 } from '../utils/native-file';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
+  useFactory: (ngZone: NgZone, monitor: DragMonitor) => {
+    return ngZone.runOutsideAngular(() => {
+      return new Html5DragBackend(monitor);
+    });
+  },
+  deps: [NgZone, DragMonitor]
 })
 export class Html5DragBackend extends DragBackend implements OnDestroy {
   private sourceNodes = new Map<string, Element>();
@@ -26,8 +32,8 @@ export class Html5DragBackend extends DragBackend implements OnDestroy {
   private currentSourceOffset: any = null;
   private nativeFileDragTimeout?: any;
 
-  constructor(monitor: DragMonitor, ngZone: NgZone) {
-    super(monitor, ngZone);
+  constructor(monitor: DragMonitor) {
+    super(monitor);
     this.setup(window);
   }
 
@@ -36,7 +42,6 @@ export class Html5DragBackend extends DragBackend implements OnDestroy {
     this.eventStream.complete();
   }
 
-  // Currently unused
   teardown: Unsubscribe = () => {};
 
   connectDragSource(sourceId: string, node: any): Unsubscribe {
@@ -44,11 +49,9 @@ export class Html5DragBackend extends DragBackend implements OnDestroy {
       return () => {};
     }
     const handleDragStart = () => this.handleDragStart(sourceId);
-    this.ngZone.runOutsideAngular(() => {
-      this.sourceNodes.set(sourceId, node);
-      node.setAttribute('draggable', true);
-      node.addEventListener('dragstart', handleDragStart);
-    });
+    this.sourceNodes.set(sourceId, node);
+    node.setAttribute('draggable', true);
+    node.addEventListener('dragstart', handleDragStart);
     return () => {
       this.sourceNodes.delete(sourceId);
       node.setAttribute('draggable', false);
@@ -65,10 +68,8 @@ export class Html5DragBackend extends DragBackend implements OnDestroy {
     }
     const handleDragOver = () => this.handleDragOver(targetId);
     const handleDrop = () => this.handleDrop(targetId);
-    this.ngZone.runOutsideAngular(() => {
-      node.addEventListener('dragover', handleDragOver);
-      node.addEventListener('drop', handleDrop);
-    });
+    node.addEventListener('dragover', handleDragOver);
+    node.addEventListener('drop', handleDrop);
     return () => {
       node.removeEventListener('dragover', handleDragOver);
       node.removeEventListener('drop', handleDrop);
@@ -84,13 +85,11 @@ export class Html5DragBackend extends DragBackend implements OnDestroy {
     const handleDragOver = (e: DragEvent) => this.handleGlobalDragOver(e);
     const handleLeave = (e: DragEvent) => this.handleGlobalDragLeave(e);
     const handleDrop = (e: DragEvent) => this.handleGlobalDrop(e);
-    this.ngZone.runOutsideAngular(() => {
-      eventTarget.addEventListener('dragstart', handleDragStart);
-      eventTarget.addEventListener('dragend', handleDragEnd);
-      eventTarget.addEventListener('dragover', handleDragOver);
-      eventTarget.addEventListener('dragleave', handleLeave);
-      eventTarget.addEventListener('drop', handleDrop);
-    });
+    eventTarget.addEventListener('dragstart', handleDragStart);
+    eventTarget.addEventListener('dragend', handleDragEnd);
+    eventTarget.addEventListener('dragover', handleDragOver);
+    eventTarget.addEventListener('dragleave', handleLeave);
+    eventTarget.addEventListener('drop', handleDrop);
     this.teardown = () => {
       this.sourceNodes.clear();
       if (!eventTarget) {
@@ -332,9 +331,7 @@ export class Html5DragBackend extends DragBackend implements OnDestroy {
   }
 
   private emitEvent(event: DragBackendEvent): void {
-    this.ngZone.run(() => {
-      this.eventStream.next(event);
-    });
+    this.eventStream.next(event);
   }
 }
 
