@@ -15,7 +15,7 @@ import { distinctUntilChanged, filter, takeUntil } from 'rxjs/operators';
 import { DragDispatcher2 } from '../drag-dispatcher.service';
 import { DragBackendEvent } from '../backends/drag-backend-event';
 import { DragBackendEventType } from '../backends/drag-backend-event-type';
-import { enterZone } from 'projects/ng-dnd/src/lib/utils/enter-zone';
+import { enterZone } from '../utils/enter-zone';
 
 export type canDropFn = (itemOrNative: string | any) => boolean;
 

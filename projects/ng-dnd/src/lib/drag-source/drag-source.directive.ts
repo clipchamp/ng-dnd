@@ -15,7 +15,7 @@ import { distinctUntilChanged, filter, take, takeUntil, map } from 'rxjs/operato
 import { DragDispatcher2 } from '../drag-dispatcher.service';
 import { DragBackendEventType } from '../backends/drag-backend-event-type';
 import { DropTarget } from '../drop-target/drop-target.directive';
-import { enterZone } from 'projects/ng-dnd/src/lib/utils/enter-zone';
+import { enterZone } from '../utils/enter-zone';
 
 @Directive({
   selector: '[ccDragSource]',
