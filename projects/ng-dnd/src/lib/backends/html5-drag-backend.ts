@@ -14,13 +14,7 @@ import {
 } from '../utils/native-file';
 
 @Injectable({
-  providedIn: 'root',
-  useFactory: (ngZone: NgZone, monitor: DragMonitor) => {
-    return ngZone.runOutsideAngular(() => {
-      return new Html5DragBackend(monitor);
-    });
-  },
-  deps: [NgZone, DragMonitor]
+  providedIn: 'root'
 })
 export class Html5DragBackend extends DragBackend implements OnDestroy {
   private sourceNodes = new Map<string, Element>();
@@ -337,5 +331,10 @@ export class Html5DragBackend extends DragBackend implements OnDestroy {
 
 export const HTML5_DRAG_BACKEND_PROVIDER: Provider = {
   provide: DragBackend,
-  useExisting: Html5DragBackend
+  useFactory: (ngZone: NgZone, monitor: DragMonitor) => {
+    return ngZone.runOutsideAngular(() => {
+      return new Html5DragBackend(monitor);
+    });
+  },
+  deps: [NgZone, DragMonitor]
 };

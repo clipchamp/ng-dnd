@@ -10,8 +10,8 @@ import { Coordinates } from '../utils/offset';
 export class TestDragBackend extends DragBackend implements OnDestroy {
   private lastEvent?: DragBackendEvent;
 
-  constructor(monitor: DragMonitor, ngZone: NgZone) {
-    super(monitor, ngZone);
+  constructor(monitor: DragMonitor) {
+    super(monitor);
   }
 
   ngOnDestroy(): void {

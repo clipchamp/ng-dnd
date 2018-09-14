@@ -98,7 +98,6 @@ export class DragSource<T = any> implements AfterViewInit, OnDestroy {
       take(1)
     );
     endDrag$.pipe(enterZone(this.ngZone)).subscribe(() => {
-      console.warn('Is in angular zone?', NgZone.isInAngularZone());
       this.isDragging = false;
       this.canDrop = false;
     });
