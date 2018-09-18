@@ -1,8 +1,13 @@
 import { AfterViewInit, ChangeDetectorRef, Component, TemplateRef } from '@angular/core';
 import { DragDispatcher2 } from './drag-dispatcher.service';
 import { Observable } from 'rxjs';
-import { DragSource } from './drag-source/drag-source.directive';
-import { DragBackendEvent } from './backends/drag-backend-event';
+
+interface PreviewItem {
+  id: string;
+  template: any;
+  context: any;
+  show: boolean;
+}
 
 @Component({
   selector: 'cc-drag-layer',
@@ -12,7 +17,7 @@ import { DragBackendEvent } from './backends/drag-backend-event';
             [style.transform]="transform(preview.context)"
             [style.width.px]="preview.context.sourceOffset.width"
             [style.height.px]="preview.context.sourceOffset.height"
-            *ngFor="let preview of previewAsArray">
+            *ngFor="let preview of previewAsArray; trackBy: trackByFn">
           <ng-container *ngTemplateOutlet="preview?.template; context: preview?.context"></ng-container>
         </div>`,
   styles: [
@@ -36,7 +41,7 @@ import { DragBackendEvent } from './backends/drag-backend-event';
 })
 export class DragLayer implements AfterViewInit {
   private readonly previews: {
-    [id: string]: { id: string; template: any; context: any; show: boolean };
+    [id: string]: PreviewItem;
   } = {};
 
   dragPreviewsEnabled$: Observable<boolean>;
@@ -76,6 +81,10 @@ export class DragLayer implements AfterViewInit {
     this.cdRef.detectChanges();
   }
 
+  trackByFn(index: number, item: PreviewItem): string {
+    return item.id;
+  }
+
   transform(context: any): string {
     if (!context || !context.clientOffset) {
       return 'none';
@@ -84,7 +93,7 @@ export class DragLayer implements AfterViewInit {
       .y - context.sourceOffset.y}px, 0)`;
   }
 
-  get previewAsArray(): { id: string; template: any; context: any; show: boolean }[] {
+  get previewAsArray(): PreviewItem[] {
     return Object.keys(this.previews).map(id => this.previews[id]);
   }
 }

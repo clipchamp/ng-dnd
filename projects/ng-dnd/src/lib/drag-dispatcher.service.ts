@@ -1,6 +1,6 @@
 import { Injectable, TemplateRef, Optional } from '@angular/core';
 import { Observable, BehaviorSubject } from 'rxjs';
-import { filter, map, auditTime, takeUntil, take, tap } from 'rxjs/operators';
+import { filter, map, auditTime, takeUntil, take, tap, distinctUntilChanged } from 'rxjs/operators';
 import { DragBackend } from './backends/drag-backend';
 import { DragBackendEvent } from './backends/drag-backend-event';
 import { DragBackendEventType } from './backends/drag-backend-event-type';
@@ -144,7 +144,10 @@ export class DragDispatcher2 {
             type === DragBackendEventType.DRAG_OVER &&
             !!this.dragLayer &&
             !(clientOffset.x === 0 && clientOffset.y === 0)
-        )
+        ),
+        distinctUntilChanged((a, b) => {
+          return a.clientOffset.x === b.clientOffset.x && a.clientOffset.y === b.clientOffset.y;
+        })
       )
       .subscribe(({ clientOffset, sourceOffset, targetId, item, sourceId }) => {
         // tslint:disable-next-line:no-non-null-assertion
