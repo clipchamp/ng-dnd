@@ -2,7 +2,7 @@ import { AfterViewInit, ChangeDetectorRef, Component, TemplateRef } from '@angul
 import { DragDispatcher2 } from './drag-dispatcher.service';
 import { Observable } from 'rxjs';
 
-interface PreviewItem {
+export interface PreviewItem {
   id: string;
   template: any;
   context: any;
