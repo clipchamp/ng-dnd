@@ -1,13 +1,14 @@
 import { AfterViewInit, ChangeDetectorRef, Component, TemplateRef } from '@angular/core';
 import { DragDispatcher2 } from './drag-dispatcher.service';
 import { Observable } from 'rxjs';
+import { DragSource } from './drag-source/drag-source.directive';
+import { DragBackendEvent } from './backends/drag-backend-event';
 
 @Component({
   selector: 'cc-drag-layer',
   template: `
         <div class="drag-preview"
-            [class.drag-preview--show]="preview.show"
-            [class.drag-preview--hidden]="!(dragPreviewsEnabled$ | async)"
+            [class.drag-preview--show]="preview.show && (dragPreviewsEnabled$ | async)"
             [style.transform]="transform(preview.context)"
             [style.width.px]="preview.context.sourceOffset.width"
             [style.height.px]="preview.context.sourceOffset.height"
@@ -29,10 +30,6 @@ import { Observable } from 'rxjs';
 
       .drag-preview--show {
         opacity: 1;
-      }
-
-      .drag-preview--hidden {
-        opacity: 0;
       }
     `
   ]
@@ -57,26 +54,21 @@ export class DragLayer implements AfterViewInit {
   }
 
   showPreview(id: string, template: TemplateRef<any>, context: any): void {
+    const isNew = !this.previews[id];
     this.previews[id] = {
       id,
       template,
       context,
-      show: false
+      show: !isNew
     };
     this.cdRef.detectChanges();
-    requestAnimationFrame(() => {
-      if (this.previews[id]) {
-        this.previews[id].show = true;
-      }
-    });
-  }
-
-  updatePreview(id: string, context: any): void {
-    if (!this.previews[id].context.clientOffset) {
-      return;
+    if (isNew) {
+      requestAnimationFrame(() => {
+        if (this.previews[id]) {
+          this.previews[id].show = true;
+        }
+      });
     }
-    this.previews[id].context = context;
-    this.cdRef.detectChanges();
   }
 
   hidePreview(id: string): void {

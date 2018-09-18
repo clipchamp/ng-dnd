@@ -1,6 +1,6 @@
 import { Injectable, TemplateRef, Optional } from '@angular/core';
 import { Observable, BehaviorSubject } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
+import { filter, map, auditTime, takeUntil, take, tap } from 'rxjs/operators';
 import { DragBackend } from './backends/drag-backend';
 import { DragBackendEvent } from './backends/drag-backend-event';
 import { DragBackendEventType } from './backends/drag-backend-event-type';
@@ -41,6 +41,7 @@ export class DragDispatcher2 {
     );
     if (!!dragSource.dragPreview && dragSource.dragPreview instanceof TemplateRef) {
       this.setupDragPreviewForDragSource(dragSourceEventStream$, dragSource.dragPreview);
+      // this.dragLayer.registerDragSource(dragSource, dragSourceEventStream$);
     }
     return dragSourceEventStream$;
   }
@@ -123,24 +124,23 @@ export class DragDispatcher2 {
     eventStream$: Observable<DragBackendEvent>,
     dragPreview: TemplateRef<any>
   ): void {
-    let active = false;
-    eventStream$
-      .pipe(filter(event => event.type === DragBackendEventType.DRAG_START && !!this.dragLayer))
-      .subscribe(({ clientOffset, sourceOffset, targetId, item, sourceId }) => {
-        active = true;
-        // tslint:disable-next-line:no-non-null-assertion
-        this.dragLayer!.showPreview(sourceId, dragPreview, {
-          clientOffset,
-          sourceOffset,
-          canDrop: !!targetId,
-          $implicit: item
-        });
-      });
     eventStream$
       .pipe(
         filter(
+          ({ type }) =>
+            (type === DragBackendEventType.DRAG_END || type === DragBackendEventType.DROP) &&
+            !!this.dragLayer
+        )
+      )
+      .subscribe(({ sourceId }) => {
+        // tslint:disable-next-line:no-non-null-assertion
+        this.dragLayer!.hidePreview(sourceId);
+      });
+    eventStream$
+      .pipe(
+        auditTime(16),
+        filter(
           ({ type, clientOffset }) =>
-            active &&
             type === DragBackendEventType.DRAG_OVER &&
             !!this.dragLayer &&
             !(clientOffset.x === 0 && clientOffset.y === 0)
@@ -148,26 +148,12 @@ export class DragDispatcher2 {
       )
       .subscribe(({ clientOffset, sourceOffset, targetId, item, sourceId }) => {
         // tslint:disable-next-line:no-non-null-assertion
-        this.dragLayer!.updatePreview(sourceId, {
+        this.dragLayer!.showPreview(sourceId, dragPreview, {
           clientOffset,
           sourceOffset,
           canDrop: !!targetId,
           $implicit: item
         });
-      });
-    eventStream$
-      .pipe(
-        filter(
-          ({ type }) =>
-            active &&
-            (type === DragBackendEventType.DRAG_END || type === DragBackendEventType.DROP) &&
-            !!this.dragLayer
-        )
-      )
-      .subscribe(({ sourceId }) => {
-        active = false;
-        // tslint:disable-next-line:no-non-null-assertion
-        this.dragLayer!.hidePreview(sourceId);
       });
   }
 

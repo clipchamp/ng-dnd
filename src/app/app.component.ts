@@ -96,7 +96,6 @@ export class AppComponent {
   }
 
   onDrop(event: any, target?: any): void {
-    console.warn('Is in angular zone?', NgZone.isInAngularZone());
     if (!!event.item.children && !target) {
       let index2 = this.findByPosition(event.clientOffset, event.target, true);
       if (index2 < 0) {
