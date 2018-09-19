@@ -1,6 +1,6 @@
 import { Injectable, TemplateRef, Optional } from '@angular/core';
 import { Observable, BehaviorSubject } from 'rxjs';
-import { filter, map, auditTime, takeUntil, take, tap, distinctUntilChanged } from 'rxjs/operators';
+import { filter, map, auditTime, distinctUntilChanged } from 'rxjs/operators';
 import { DragBackend } from './backends/drag-backend';
 import { DragBackendEvent } from './backends/drag-backend-event';
 import { DragBackendEventType } from './backends/drag-backend-event-type';
