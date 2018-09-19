@@ -100,8 +100,8 @@ export class Html5DragBackend extends DragBackend implements OnDestroy {
   private handleGlobalDragStart(event: DragEvent): void {
     const { dragStartSourceId: sourceIds, activeSourceId } = this;
     this.dragStartSourceId = null;
-    const clientOffset = getEventClientOffset(event);
     if (!sourceIds) {
+      const clientOffset = this.monitor.getMousePositionFromEvent(event);
       this.activeSourceId = getNativeItemType(event.dataTransfer);
       this.emitEvent({
         type: DragBackendEventType.DRAG_START,
@@ -121,7 +121,11 @@ export class Html5DragBackend extends DragBackend implements OnDestroy {
         }
         this.currentSourceOffset = getSourceOffset(
           this.sourceNodes.get(sourceId) || target,
-          clientOffset
+          getEventClientOffset(event)
+        );
+        const clientOffset = this.monitor.getMousePositionFromEvent(
+          event,
+          this.currentSourceOffset
         );
         this.emitEvent({
           type: DragBackendEventType.DRAG_START,
@@ -159,7 +163,7 @@ export class Html5DragBackend extends DragBackend implements OnDestroy {
     this.dragOverTargetId = null;
     this.dropTargetId = null;
     this.currentSourceOffset = null;
-    const clientOffset = getEventClientOffset(event);
+    const clientOffset = this.monitor.getMousePositionFromEvent(event, sourceOffset);
     this.emitEvent({
       type: DragBackendEventType.DRAG_END,
       clientOffset,
@@ -181,7 +185,6 @@ export class Html5DragBackend extends DragBackend implements OnDestroy {
       clearTimeout(this.nativeFileDragTimeout);
       this.nativeFileDragTimeout = undefined;
     }
-    const clientOffset = getEventClientOffset(event);
     if (!this.activeSourceId) {
       return this.handleGlobalDragStart(event);
     }
@@ -190,6 +193,7 @@ export class Html5DragBackend extends DragBackend implements OnDestroy {
       activeSourceId: sourceId,
       currentSourceOffset: sourceOffset
     } = this;
+    const clientOffset = this.monitor.getMousePositionFromEvent(event, sourceOffset);
     this.dragOverTargetId = null;
     if (targetIds) {
       for (let i = targetIds.length - 1; i >= 0; i--) {
@@ -253,7 +257,7 @@ export class Html5DragBackend extends DragBackend implements OnDestroy {
     if (!targetIds) {
       return;
     }
-    const clientOffset = getEventClientOffset(event);
+    const clientOffset = this.monitor.getMousePositionFromEvent(event, sourceOffset);
     for (let i = targetIds.length - 1; i >= 0; i--) {
       const targetId = targetIds[i];
       const canDrop = this.monitor.canDrop(targetId, sourceId);

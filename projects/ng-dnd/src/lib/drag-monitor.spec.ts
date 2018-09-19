@@ -258,4 +258,21 @@ describe('DragMonitor', () => {
     expect(getTargetSpy).toHaveBeenCalledTimes(1);
     expect(getTargetSpy).toHaveBeenCalledWith('foo');
   });
+
+  it('should return the position from the drag event', () => {
+    const position = monitor.getMousePositionFromEvent({ x: 10, y: 20 } as DragEvent);
+    expect(position.x).toBe(10);
+    expect(position.y).toBe(20);
+  });
+
+  it('should return the position from the drag event after passing it through adjust function', () => {
+    const spy = jasmine
+      .createSpy('adjustMousePositionFn', pos => ({ x: pos.x + 5, y: pos.y + 10 }))
+      .and.callThrough();
+    monitor.adjustMousePositionFn = spy;
+    const position = monitor.getMousePositionFromEvent({ x: 10, y: 20 } as DragEvent);
+    expect(position.x).toBe(15);
+    expect(position.y).toBe(30);
+    expect(spy).toHaveBeenCalledWith({ x: 10, y: 20 }, undefined);
+  });
 });

@@ -2,10 +2,22 @@ import { TemplateRef, Injectable } from '@angular/core';
 import { DragRegistry } from './drag-registry';
 import { getEmptyImage } from './utils/get-empty-image';
 import { NATIVE_FILE, NATIVE_STRING } from './utils/native-file';
+import { Coordinates, getEventClientOffset } from './utils/offset';
+
+export type AdjustMousePositionFn = (
+  mousePosition: Coordinates,
+  sourceOffset?: Coordinates & { width: number; height: number }
+) => Coordinates;
 
 @Injectable({ providedIn: 'root' })
 export class DragMonitor {
+  private _adjustMousePositionFn: AdjustMousePositionFn = pos => pos;
+
   constructor(private readonly registry: DragRegistry) {}
+
+  set adjustMousePositionFn(fn: AdjustMousePositionFn) {
+    this._adjustMousePositionFn = fn;
+  }
 
   canDrag(sourceId: string): boolean {
     const source = this.registry.getSource(sourceId);
@@ -54,5 +66,12 @@ export class DragMonitor {
       return 'none';
     }
     return target.dropEffect;
+  }
+
+  getMousePositionFromEvent(
+    event: DragEvent,
+    sourceOffset?: Coordinates & { width: number; height: number }
+  ): Coordinates {
+    return this._adjustMousePositionFn(getEventClientOffset(event), sourceOffset);
   }
 }
