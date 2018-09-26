@@ -1,6 +1,6 @@
 {
   "name": "cc-drag-n-drop",
-  "version": "0.2.7",
+  "version": "0.2.8",
   "repository": {
     "type": "git",
     "url": "https://github.com/clipchamp/ng-dnd"
@@ -9,7 +9,7 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build ng-dnd",
+    "build": "ng build ng-dnd --prod",
     "build:doc": "ng build",
     "test": "ng test ng-dnd --source-map=false",
     "test:ci": "ng test ng-dnd --watch=false --browsers=ChromeHeadless --code-coverage",

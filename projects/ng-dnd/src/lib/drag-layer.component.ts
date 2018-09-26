@@ -42,6 +42,10 @@ export interface PreviewItem {
 export class DragLayer implements AfterViewInit, OnDestroy {
   dragPreviewsEnabled$: Observable<boolean>;
 
+  get previewAsArray(): PreviewItem[] {
+    return Object.keys(this.previews).map(id => this.previews[id]);
+  }
+
   private readonly previews: {
     [id: string]: PreviewItem;
   } = {};
@@ -53,13 +57,14 @@ export class DragLayer implements AfterViewInit, OnDestroy {
     private readonly cdRef: ChangeDetectorRef
   ) {
     this.dragPreviewsEnabled$ = this.dragDispatcher.dragPreviewsEnabled$;
-    this.subscription = this.dragPreviewsEnabled$.subscribe(() => this.cdRef.detectChanges());
   }
 
   ngAfterViewInit(): void {
     this.dragDispatcher.connectDragLayer(this);
     this.cdRef.detach();
+    this.subscription = this.dragPreviewsEnabled$.subscribe(() => this.cdRef.detectChanges());
   }
+
   ngOnDestroy(): void {
     this.cdRef.reattach();
     this.subscription.unsubscribe();
@@ -98,9 +103,5 @@ export class DragLayer implements AfterViewInit, OnDestroy {
     }
     return `translate3d(${context.clientOffset.x - context.sourceOffset.x}px, ${context.clientOffset
       .y - context.sourceOffset.y}px, 0)`;
-  }
-
-  get previewAsArray(): PreviewItem[] {
-    return Object.keys(this.previews).map(id => this.previews[id]);
   }
 }
