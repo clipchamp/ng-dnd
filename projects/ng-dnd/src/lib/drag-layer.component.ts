@@ -1,6 +1,6 @@
-import { AfterViewInit, ChangeDetectorRef, Component, TemplateRef } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, TemplateRef, OnDestroy } from '@angular/core';
 import { DragDispatcher2 } from './drag-dispatcher.service';
-import { Observable } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 
 export interface PreviewItem {
   id: string;
@@ -39,23 +39,30 @@ export interface PreviewItem {
     `
   ]
 })
-export class DragLayer implements AfterViewInit {
+export class DragLayer implements AfterViewInit, OnDestroy {
+  dragPreviewsEnabled$: Observable<boolean>;
+
   private readonly previews: {
     [id: string]: PreviewItem;
   } = {};
 
-  dragPreviewsEnabled$: Observable<boolean>;
+  private subscription = Subscription.EMPTY;
 
   constructor(
     private readonly dragDispatcher: DragDispatcher2,
     private readonly cdRef: ChangeDetectorRef
   ) {
     this.dragPreviewsEnabled$ = this.dragDispatcher.dragPreviewsEnabled$;
+    this.subscription = this.dragPreviewsEnabled$.subscribe(() => this.cdRef.detectChanges());
   }
 
   ngAfterViewInit(): void {
     this.dragDispatcher.connectDragLayer(this);
     this.cdRef.detach();
+  }
+  ngOnDestroy(): void {
+    this.cdRef.reattach();
+    this.subscription.unsubscribe();
   }
 
   showPreview(id: string, template: TemplateRef<any>, context: any): void {
