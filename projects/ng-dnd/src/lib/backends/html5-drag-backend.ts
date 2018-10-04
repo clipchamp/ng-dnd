@@ -127,11 +127,15 @@ export class Html5DragBackend extends DragBackend implements OnDestroy {
           event,
           this.currentSourceOffset
         );
-        this.emitEvent({
-          type: DragBackendEventType.DRAG_START,
-          sourceId,
-          clientOffset,
-          sourceOffset: this.currentSourceOffset
+        // Needs to be in timeout due to Chrome bug
+        // see: https://stackoverflow.com/questions/14203734/dragend-dragenter-and-dragleave-firing-off-immediately-when-i-drag
+        setTimeout(() => {
+          this.emitEvent({
+            type: DragBackendEventType.DRAG_START,
+            sourceId,
+            clientOffset,
+            sourceOffset: this.currentSourceOffset
+          });
         });
         try {
           const previewImage = this.monitor.getPreviewImageForSourceId(sourceId);
